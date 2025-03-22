@@ -1,0 +1,9 @@
+rules:
+  - cre:
+      id: bad-order
+    rule:
+      set:
+        event:
+          source: kafka
+        order: # Use match instead
+          - bar

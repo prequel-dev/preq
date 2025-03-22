@@ -1,0 +1,17 @@
+rules:
+  - cre:
+      id: neg-all-opts
+    rule:
+      set:
+        event:
+          source: kafka
+        window: 5s
+        match:
+          - regex: "foo(.+)bar"
+          - value: "test"
+          - regex: "b(.+)az"
+        negate:
+          - value: FP1
+            slide: -9s
+            anchor: 1
+            window: 1s

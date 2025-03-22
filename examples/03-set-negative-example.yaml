@@ -1,0 +1,14 @@
+rules:
+  - cre:
+      id: set-negative
+    rule:
+      set:
+        window: 10s
+        event:
+          source: kafka
+        match:
+          - value: "test"
+          - regex: "foo(.+)bar"
+          - regex: "b(.+)az"
+        negate:
+          - already in use

@@ -1,0 +1,9 @@
+rules:
+  - cre:
+      id: bad-negate
+    rule:
+      set:
+        event:
+          source: kafka
+        negate: # Negates may not be used without positive conditions
+          - "foo(.+)bar"

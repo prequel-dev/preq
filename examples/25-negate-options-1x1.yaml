@@ -1,0 +1,11 @@
+rules:
+  - cre:
+      id: negate-options-1x1
+    rule:
+      set:
+        event:
+          source: kafka
+        match:
+          - regex: "foo(.+)bar"
+        negate:
+          - FP1

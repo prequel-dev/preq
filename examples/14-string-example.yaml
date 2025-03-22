@@ -1,0 +1,9 @@
+rules:
+  - cre:
+      id: string-example-2
+    rule:
+      set:
+        event:
+          source: kafka
+        match:
+          - "[emerg] 1655#1655: still could not bind()"

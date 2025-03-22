@@ -1,0 +1,9 @@
+rules:
+  - cre:
+      id: bad-regex-example
+    rule:
+      set:
+        event:
+          source: kafka
+        match:
+          - "\\[emerg] (.+) still could not bind()" # use regex: instead

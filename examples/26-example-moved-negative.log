@@ -1,0 +1,11 @@
+2019/02/05 12:07:37 [notice] 1629#1629: signal process started
+2019/02/05 12:07:37 [error] 1629#1629: open() "/run/nginx.pid" failed (2: No such file or directory)
+2019/02/05 12:07:37 [emerg] 1655#1655: bind() just kidding false alarm this is normal
+2019/02/05 12:07:38 [emerg] 1655#1655: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2019/02/05 12:07:38 [emerg] 1655#1655: bind() to foo bar
+2019/02/05 12:07:39 [emerg] 1655#1655: bind() to test
+2019/02/05 12:07:40 [emerg] 1655#1655: bind() to 0.0.0.0:444 failed (98: Address already in use)
+2019/02/05 12:07:44 [emerg] FP1 happens 6 seconds later so the rule fires
+2019/02/05 12:07:47 [emerg] 1655#1655: bind() to [::]:444 failed (98: Address already in use)
+2019/02/05 12:07:48 [emerg] 1655#1655: still could not bind() to baaaz
+2019/02/05 12:07:49 [alert] 1631#1631: unlink() "/run/nginx.pid" failed (2: No such file or directory)

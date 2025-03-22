@@ -1,0 +1,9 @@
+rules:
+  - cre:
+      id: bad-seq-one-negate-condition
+    rule:
+      sequence:
+        event:
+          source: kafka
+        negate:
+          - regex: "foo(.+)bar" # one negate condition not allowed

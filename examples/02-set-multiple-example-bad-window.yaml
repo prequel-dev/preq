@@ -1,0 +1,12 @@
+rules:
+  - cre:
+      id: set-example-2
+    rule:
+      set:
+        window: 1s
+        event:
+          source: kafka
+        match:
+          - value: "test"
+          - regex: "foo(.+)bar"
+          - regex: "b(.+)az"

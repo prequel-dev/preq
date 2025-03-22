@@ -1,0 +1,12 @@
+rules:
+  - cre:
+      id: negate-window
+    rule:
+      set:
+        event:
+          source: kafka
+        match:
+          - regex: "foo(.+)bar"
+        negate:
+          - value: FP1
+            window: 5s

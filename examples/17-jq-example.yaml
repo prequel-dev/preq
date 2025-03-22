@@ -1,0 +1,9 @@
+rules:
+  - cre:
+      id: jq-example-1
+    rule:
+      set:
+        event:
+          source: kafka
+        match:
+          - jq: ".event == \"worker_process_crash\""

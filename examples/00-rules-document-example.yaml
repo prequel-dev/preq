@@ -1,0 +1,35 @@
+rules:
+  - cre:
+      id: cre-2025-0
+    metadata:
+      id: rule-id=0
+      hash: rule-hash-0
+    rule:
+      set:
+        window: 5s
+        event:
+          source: kafka
+        match:
+          - commonExpression1
+          - "this is another match"
+  - cre:
+      id: cre-2025-1
+    metadata:
+      id: rule-id-0
+      hash: rule-hash-1
+    rule:
+      sequence:
+        window: 10s
+        event:
+          source: kafka
+        order:
+          - regex: "foo(.+)bar"
+          - commonExpression1
+          - commonExpression2
+
+# Optional terms section for reusing common conditions
+terms:
+  commonExpression1:
+    regex: "bo(.+)r"
+  commonExpression2:
+    value: "some other match" 

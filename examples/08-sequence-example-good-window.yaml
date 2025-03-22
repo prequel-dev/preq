@@ -1,0 +1,12 @@
+rules:
+  - cre:
+      id: seq-example-1
+    rule:
+      sequence:
+        event:
+          source: kafka
+        window: 10s
+        order:
+          - regex: "foo(.+)bar"
+          - value: "test"
+          - regex: "b(.+)az"

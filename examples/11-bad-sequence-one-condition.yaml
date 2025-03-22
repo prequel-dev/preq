@@ -1,0 +1,9 @@
+rules:
+  - cre:
+      id: bad-seq-one-condition
+    rule:
+      sequence:
+        event:
+          source: kafka
+        order:
+          - regex: "foo(.+)bar" # one condition not allowed

@@ -1,0 +1,9 @@
+rules:
+  - cre:
+      id: jq-example-2
+    rule:
+      set:
+        event:
+          source: kafka
+        match:
+          - jq: "select(.event == \"worker_process_crash\" and .level == \"error\")"

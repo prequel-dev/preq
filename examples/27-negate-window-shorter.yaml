@@ -1,0 +1,15 @@
+rules:
+  - cre:
+      id: negate-window-shorter
+    rule:
+      set:
+        event:
+          source: kafka
+        window: 5s
+        match:
+          - regex: "foo(.+)bar"
+          - value: "test"
+          - regex: "b(.+)az"
+        negate:
+          - value: FP2
+            window: 17s

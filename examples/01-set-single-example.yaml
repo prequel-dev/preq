@@ -1,0 +1,9 @@
+rules:
+  - cre:
+      id: set-example
+    rule:
+      set:
+        event:
+          source: kafka
+        match:
+          - "foo(.+)bar"

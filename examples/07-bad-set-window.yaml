@@ -1,0 +1,11 @@
+rules:
+  - cre:
+      id: bad-window
+    rule:
+      set:
+        # missing window
+        event:
+          source: kafka
+        match:
+          - foo
+          - bar
