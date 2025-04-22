@@ -258,10 +258,13 @@ func ProcessName() string {
 
 func WriteDataSourceTemplate(name string, ver *semver.Version, template []byte) (string, error) {
 
+	header := dataSourceTemplateHeader1 + dataSourceTemplateHeader2 + dataSourceTemplateHeader3 + dataSourceTemplateHeader4
+
 	switch name {
 	case "":
 		name = dataSourceName
 	case "-":
+		fmt.Fprint(os.Stdout, header)
 		fmt.Fprint(os.Stdout, string(template))
 		return "", nil
 	}
@@ -273,8 +276,6 @@ func WriteDataSourceTemplate(name string, ver *semver.Version, template []byte) 
 		return "", err
 	}
 	defer file.Close()
-
-	header := dataSourceTemplateHeader1 + dataSourceTemplateHeader2 + dataSourceTemplateHeader3 + dataSourceTemplateHeader4
 
 	if _, err := file.Write([]byte(header)); err != nil {
 		return "", err
