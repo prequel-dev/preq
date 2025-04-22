@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: neg-all-opts
+    metadata:
+      id: rule-id
     rule:
       set:
         event:

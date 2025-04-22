@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: bad-regex-example
+    metadata:
+      id: rule-id
     rule:
       set:
         event:

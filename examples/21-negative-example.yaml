@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: negate-example
+    metadata:
+      id: rule-id
     rule:
       sequence:
         event:

@@ -31,6 +31,7 @@ require (
 	github.com/cqroot/prompt v0.9.4
 	github.com/fatih/color v1.18.0
 	github.com/prequel-dev/prequel-compiler v0.0.4
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -62,5 +63,4 @@ require (
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

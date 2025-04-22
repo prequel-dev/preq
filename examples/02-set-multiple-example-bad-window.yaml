@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: set-example-2
+    metadata:
+      id: rule-id
     rule:
       set:
         window: 1s

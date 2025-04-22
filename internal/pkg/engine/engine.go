@@ -10,10 +10,12 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/Masterminds/semver"
 	"github.com/prequel-dev/preq/internal/pkg/resolve"
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/prequel-compiler/pkg/compiler"
+	"github.com/prequel-dev/prequel-compiler/pkg/datasrc"
 	"github.com/prequel-dev/prequel-compiler/pkg/matchz"
 	"github.com/prequel-dev/prequel-compiler/pkg/parser"
 	"github.com/prequel-dev/prequel-compiler/pkg/pqerr"
@@ -21,6 +23,7 @@ import (
 	"github.com/prequel-dev/prequel-logmatch/pkg/entry"
 	lm "github.com/prequel-dev/prequel-logmatch/pkg/match"
 	"github.com/prequel-dev/prequel-logmatch/pkg/scanner"
+	"gopkg.in/yaml.v2"
 
 	"github.com/jedib0t/go-pretty/v6/progress"
 	"github.com/rs/zerolog/log"
@@ -742,4 +745,34 @@ func (r *TrkRdr) Read(p []byte) (n int, err error) {
 	n, err = r.rd.Read(p)
 	r.trk.Increment(int64(n))
 	return
+}
+
+func (r *RuleMatchersT) DataSourceTemplate(currRulesVer *semver.Version) ([]byte, error) {
+
+	var (
+		out = datasrc.DataSources{
+			Version: currRulesVer.String(),
+			Sources: make([]datasrc.Source, 0, len(r.eventSrc)),
+		}
+		data []byte
+		err  error
+	)
+
+	for _, value := range r.eventSrc {
+		out.Sources = append(out.Sources, datasrc.Source{
+			Name: fmt.Sprintf("my-%s", value.Source),
+			Type: value.Source,
+			Locations: []datasrc.Location{
+				{
+					Path: fmt.Sprintf("/path/to/my-%s", value.Source),
+				},
+			},
+		})
+	}
+
+	if data, err = yaml.Marshal(out); err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

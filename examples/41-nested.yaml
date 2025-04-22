@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: nested-example
+    metadata:
+      id: rule-id
     rule:
       sequence:
         window: 30s

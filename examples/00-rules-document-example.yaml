@@ -2,7 +2,7 @@ rules:
   - cre:
       id: cre-2025-0
     metadata:
-      id: rule-id=0
+      id: rule-id-0
       hash: rule-hash-0
     rule:
       set:

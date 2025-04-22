@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: set-negative
+    metadata:
+      id: rule-id
     rule:
       set:
         window: 10s

@@ -1,6 +1,8 @@
 rules:
   - cre:
-      id: seq-example-1
+      id: seq-example-2
+    metadata:
+      id: rule-id
     rule:
       sequence:
         event:

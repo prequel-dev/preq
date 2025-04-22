@@ -42,10 +42,11 @@ var (
 var cli struct {
 	Disabled      bool   `short:"d" help:"Do not run community CREs"`
 	Stop          string `short:"e" help:"Stop time"`
+	Generate      bool   `short:"g" help:"Generate data sources template"`
 	JsonLogs      bool   `short:"j" help:"Print logs in JSON format to stderr" default:"false"`
-	Skip          int    `short:"k" help:"Skip the first N lines for timestamp detection" default:"20"`
+	Skip          int    `short:"k" help:"Skip the first N lines for timestamp detection" default:"50"`
 	Level         string `short:"l" help:"Print logs at this level to stderr"`
-	ReportFile    string `short:"n" help:"Report filename"`
+	Filename      string `short:"n" help:"Report or template output file name"`
 	Quiet         bool   `short:"q" help:"Quiet mode, do not print progress"`
 	Rules         string `short:"r" help:"Path to a CRE file"`
 	Source        string `short:"s" help:"Path to a data source file"`
@@ -225,6 +226,37 @@ func main() {
 		os.Exit(1)
 	}
 
+	if cli.Generate {
+
+		var (
+			currRulesVer *semver.Version
+			template     []byte
+			fn           string
+		)
+
+		if currRulesVer, _, err = rules.GetCurrentRulesVersion(defaultConfigDir); err != nil {
+			log.Error().Err(err).Msg("Failed to get current rules version")
+		}
+
+		if template, err = ruleMatchers.DataSourceTemplate(currRulesVer); err != nil {
+			log.Error().Err(err).Msg("Failed to generate data source template")
+			ux.RulesError(err)
+			os.Exit(1)
+		}
+
+		if fn, err = ux.WriteDataSourceTemplate(cli.Filename, currRulesVer, template); err != nil {
+			log.Error().Err(err).Msg("Failed to write data source template")
+			ux.DataError(err)
+			os.Exit(1)
+		}
+
+		if fn != "" {
+			fmt.Fprintf(os.Stdout, "Wrote data source template to %s\n", fn)
+		}
+
+		os.Exit(0)
+	}
+
 	if len(sources) == 0 {
 		ux.PrintUsage()
 		os.Exit(1)
@@ -267,14 +299,14 @@ LOOP:
 	}
 
 	switch {
-	case cli.ReportFile == stdoutReport:
+	case cli.Filename == stdoutReport:
 		if err = report.PrintReport(); err != nil {
 			log.Error().Err(err).Msg("Failed to print report")
 			ux.RulesError(err)
 			os.Exit(1)
 		}
-	case cli.ReportFile != "":
-		if reportPath, err = report.Write(cli.ReportFile); err != nil {
+	case cli.Filename != "":
+		if reportPath, err = report.Write(cli.Filename); err != nil {
 			log.Error().Err(err).Msg("Failed to write full report")
 			ux.RulesError(err)
 			os.Exit(1)

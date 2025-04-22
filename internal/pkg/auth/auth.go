@@ -459,7 +459,7 @@ func Login(ctx context.Context, baseAddr, tokenPath string) (string, error) {
 	}
 
 	if deviceAuth.VerificationUriComplete != "" {
-		fmt.Println(deviceAuth.VerificationUriComplete)
+		ux.PrintDeviceAuthUrl(deviceAuth.VerificationUriComplete)
 
 		if uri, err = url.Parse(deviceAuth.VerificationUriComplete); err != nil {
 			log.Error().Err(err).Msg("Failed to parse verification URI")

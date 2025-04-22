@@ -13,75 +13,79 @@ import (
 
 var (
 	DefaultConfig = `timestamps:
-    # {"level":"error","error":"context deadline exceeded","time":1744570895480541,"caller":"server.go:462"}
+    # Example: {"level":"error","error":"context deadline exceeded","time":1744570895480541,"caller":"server.go:462"}
   - format: epochany
     pattern: |
       "time":(\d{16,19})
-    # 2006-01-02T15:04:05Z07:00 log message
+    # Example: 2006-01-02T15:04:05Z07:00 <log message>
   - format: rfc3339
     pattern: |
       ^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+\-]\d{2}:\d{2}))
-    # 2006/01/02 03:04:05 log message
+    # Example: 2006/01/02 03:04:05 <log message>
   - format: "2006/01/02 03:04:05"
     pattern: |
       ^(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2})
-    # 2006-01-02 15:04:05.000 log message
+    # Example: 2006-01-02 15:04:05.000 <log message>
   - format: "2006-01-02 15:04:05.000" # ISO 8601
     pattern: |
       ^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})
-    # Jan 2 15:04:05 log message
+    # Example: Jan 2 15:04:05 <log message>
   - format: "Jan 2 15:04:05" # RFC 3164
     pattern: |
       ^([A-Z][a-z]{2}\s{1,2}\d{1,2}\s\d{2}:\d{2}:\d{2})
-    # 2006-01-02 15:04:05 log message
+    # Example: 2006-01-02 15:04:05 <log message>
   - format: "2006-01-02 15:04:05" # w3c
     pattern: |
       ^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})
-    # I0102 15:04:05.000000 log message
+    # Example: I0102 15:04:05.000000 <log message>
   - format: "0102 15:04:05.000000" # go/klog
     pattern: |
       ^[IWEF](\d{4} \d{2}:\d{2}:\d{2}\.\d{6})
-    # [2006-01-02 15:04:05,000] log message
+    # Example: [2006-01-02 15:04:05,000] <log message>
   - format: "2006-01-02 15:04:05,000"
     pattern: |
       ^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\]
-    # 2006-01-02 15:04:05.000000-0700 log message
+    # Example: 2006-01-02 15:04:05.000000-0700 <log message>
   - format: "2006-01-02 15:04:05.000000-0700"
     pattern: |
       ^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}[+-]\d{4})
-    # 2006/01/02 15:04:05 log message
+    # Example: 2006/01/02 15:04:05 <log message>
   - format: "2006/01/02 15:04:05"
     pattern: |
       ^(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2})
-    # 01/02/2006, 15:04:05 log message
+    # Example: 01/02/2006, 15:04:05 <log message>
   - format: "01/02/2006, 15:04:05" # IIS format
     pattern: |
       ^(\d{2}/\d{2}/\d{4}, \d{2}:\d{2}:\d{2})
-    # 02 Jan 2006 15:04:05.000 log message
+    # Example: 02 Jan 2006 15:04:05.000 <log message>
   - format: "02 Jan 2006 15:04:05.000" 
     pattern: |
       ^(\d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2}\.\d{3})
-    # 2006 Jan 02 15:04:05.000 log message
+    # Example: 2006 Jan 02 15:04:05.000 <log message>
   - format: "2006 Jan 02 15:04:05.000"
     pattern: |
       ^(\d{4} [A-Z][a-z]{2} \d{2} \d{2}:\d{2}:\d{2}\.\d{3})
-    # 02/Jan/2006:15:04:05.000 log message
+    # Example: 02/Jan/2006:15:04:05.000 <log message>
   - format: "02/Jan/2006:15:04:05.000"
     pattern: |
       ^(\d{2}/[A-Z][a-z]{2}/\d{4}:\d{2}:\d{2}:\d{2}\.\d{3})
-    # 01/02/2006 03:04:05 PM log message
+    # Example: 01/02/2006 03:04:05 PM <log message>
   - format: "01/02/2006 03:04:05 PM"
     pattern: |
       ^(\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2} (AM|PM))
-    # 2006 Jan 02 15:04:05 log message
+    # Example: 2006 Jan 02 15:04:05 <log message>
   - format: "2006 Jan 02 15:04:05" 
     pattern: |
       ^(\d{4} [A-Z][a-z]{2} \d{2} \d{2}:\d{2}:\d{2})
-    # 2006-01-02 15:04:05.000 log message
+    # Example: 2006-01-02 15:04:05.000 <log message>
   - format: "2006-01-02 15:04:05.000"
     pattern: |
       ^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})
-    # {"Id":19,"Version":1,"Opcode":13,"RecordId":1493,"LogName":"System","ProcessId":4324,"ThreadId":10456,"MachineName":"windows","TimeCreated":"\/Date(1743448267142)\/"}
+    # Example: {"timestamp":"2025-03-26T14:01:02Z","level":"info", "message":"..."}
+  - format: rfc3339
+    pattern: |
+      "timestamp"\s*:\s*"([^"]+)"
+    # Example: {"Id":19,"Version":1,"Opcode":13,"RecordId":1493,"LogName":"System","ProcessId":4324,"ThreadId":10456,"MachineName":"windows","TimeCreated":"\/Date(1743448267142)\/"}
   - format: epochany # Windows Get-Events JSON output
     pattern: |
       /Date\((\d+)\)

@@ -9,11 +9,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/prequel-dev/preq/internal/pkg/verz"
+	"github.com/prequel-dev/prequel-logmatch/pkg/format"
+
 	"github.com/Masterminds/semver"
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/progress"
 	"github.com/jedib0t/go-pretty/v6/text"
-	"github.com/prequel-dev/preq/internal/pkg/verz"
 )
 
 var (
@@ -26,7 +28,7 @@ const (
 	ErrorCategoryData   = "Data"
 	ErrorCategoryConfig = "Config"
 	ErrorCategoryAuth   = "Auth"
-	ErrorHelpData       = "https://docs.prequel.dev/timestamps"
+	ErrorHelpDataStr    = "https://docs.prequel.dev/timestamps"
 )
 
 const (
@@ -38,6 +40,15 @@ const (
 )
 
 const (
+	dataSourceTemplateHeader1 = "# See https://docs.prequel.dev/data-sources for how to customize this template with your own data sources\n"
+	dataSourceTemplateHeader2 = "# Remove any data sources that are not running on this system\n"
+	dataSourceTemplateHeader3 = "# Add custom timestamp formats to the data sources if they are not already supported by default\n"
+	dataSourceTemplateHeader4 = "# If the data source is for a library that is used by multiple applications, you can add more than one path to the same data source\n"
+	dataSourceName            = "data-sources"
+)
+
+const (
+	authUrlFmt         = "Attempting to automatically open SSO authorization in your default browser.\nIf the browser does not open or you wish to use a different device to authorize this request, open the following URL: \n\n%s\n\n"
 	emailVerifyTitle   = "\nYou're one step away! Please verify your email\n"
 	emailVerifyBodyFmt = "It looks like your email (%s) has not been verified yet. Check your inbox for a verification link from "
 	emailVerifyFooter  = " and click it to activate your account. If you do not see the email, check your spam folder.\n\nSee https://docs.prequel.dev/updates for more information.\n\n"
@@ -213,14 +224,21 @@ func AuthError(err error) error {
 
 func CategoryError(category string, err error) error {
 	fmt.Fprintf(os.Stderr, "%s error: %v\n", category, err)
-	ErrorHelp(category)
+	ErrorHelp(category, err)
 	return err
 }
 
-func ErrorHelp(category string) {
+func ErrorHelp(category string, err error) {
 	switch category {
 	case ErrorCategoryData:
-		fmt.Fprintf(os.Stderr, "See %s for help resolving this error\n", ErrorHelpData)
+		ErrorHelpData(err)
+	}
+}
+
+func ErrorHelpData(err error) {
+	switch err {
+	case format.ErrMatchTimestamp:
+		fmt.Fprintf(os.Stderr, "See %s for help resolving this error\n", ErrorHelpDataStr)
 	}
 }
 
@@ -236,4 +254,39 @@ func ErrorMsg(err error, msg string) error {
 
 func ProcessName() string {
 	return filepath.Base(os.Args[0])
+}
+
+func WriteDataSourceTemplate(name string, ver *semver.Version, template []byte) (string, error) {
+
+	switch name {
+	case "":
+		name = dataSourceName
+	case "-":
+		fmt.Fprint(os.Stdout, string(template))
+		return "", nil
+	}
+
+	fn := fmt.Sprintf("%s-%s.yaml", name, ver.String())
+
+	file, err := os.Create(fn)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	header := dataSourceTemplateHeader1 + dataSourceTemplateHeader2 + dataSourceTemplateHeader3 + dataSourceTemplateHeader4
+
+	if _, err := file.Write([]byte(header)); err != nil {
+		return "", err
+	}
+
+	if _, err := file.Write(template); err != nil {
+		return "", err
+	}
+
+	return fn, nil
+}
+
+func PrintDeviceAuthUrl(url string) {
+	fmt.Fprintf(os.Stdout, authUrlFmt, url)
 }

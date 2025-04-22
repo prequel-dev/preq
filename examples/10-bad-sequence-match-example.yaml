@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: bad-seq-match
+    metadata:
+      id: rule-id
     rule:
       sequence:
         event:

@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: negate-anchor
+    metadata:
+      id: rule-id
     rule:
       set:
         event:

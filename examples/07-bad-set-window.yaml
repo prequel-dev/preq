@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: bad-window
+    metadata:
+      id: rule-id
     rule:
       set:
         # missing window

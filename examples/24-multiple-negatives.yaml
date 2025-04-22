@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: multiple-negatives
+    metadata:
+      id: rule-id
     rule:
       sequence:
         event:

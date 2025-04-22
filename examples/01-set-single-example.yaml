@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: set-example
+    metadata:
+      id: rule-id
     rule:
       set:
         event:

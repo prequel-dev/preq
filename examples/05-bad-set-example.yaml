@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: bad-order
+    metadata:
+      id: rule-id
     rule:
       set:
         event:

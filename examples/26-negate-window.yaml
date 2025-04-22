@@ -1,6 +1,8 @@
 rules:
   - cre:
       id: negate-window
+    metadata:
+      id: rule-id
     rule:
       set:
         event:
