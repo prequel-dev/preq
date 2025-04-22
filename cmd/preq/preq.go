@@ -46,7 +46,7 @@ var cli struct {
 	JsonLogs      bool   `short:"j" help:"Print logs in JSON format to stderr" default:"false"`
 	Skip          int    `short:"k" help:"Skip the first N lines for timestamp detection" default:"50"`
 	Level         string `short:"l" help:"Print logs at this level to stderr"`
-	Filename      string `short:"n" help:"Report or template output file name"`
+	Filename      string `short:"n" help:"Report or data source template output file name"`
 	Quiet         bool   `short:"q" help:"Quiet mode, do not print progress"`
 	Rules         string `short:"r" help:"Path to a CRE file"`
 	Source        string `short:"s" help:"Path to a data source file"`
