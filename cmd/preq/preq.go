@@ -42,7 +42,6 @@ var (
 var cli struct {
 	Disabled      bool   `short:"d" help:"Do not run community CREs"`
 	Stop          string `short:"e" help:"Stop time"`
-	Generate      bool   `short:"g" help:"Generate data sources template"`
 	JsonLogs      bool   `short:"j" help:"Print logs in JSON format to stderr" default:"false"`
 	Skip          int    `short:"k" help:"Skip the first N lines for timestamp detection" default:"20"`
 	Level         string `short:"l" help:"Print logs at this level to stderr"`
