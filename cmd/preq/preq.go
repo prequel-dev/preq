@@ -226,33 +226,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	/*
-		if cli.Generate {
-			var (
-				//currRulesVer *semver.Version
-				//template []byte
-				err      error
-			)
-
-			if currRulesVer, _, err = rules.GetCurrentRulesVersion(defaultConfigDir); err != nil {
-				log.Error().Err(err).Msg("Failed to get current rules version")
-			}
-
-				if template, err = ruleMatchers.DataSourceTemplate(currRulesVer); err != nil {
-					log.Error().Err(err).Msg("Failed to generate data source template")
-					ux.RulesError(err)
-					os.Exit(1)
-				}
-
-				if _, err = os.Stdout.Write(template); err != nil {
-					log.Error().Err(err).Msg("Failed to write data source template")
-					ux.RulesError(err)
-					os.Exit(1)
-				}
-			os.Exit(0)
-		}
-	*/
-
 	if len(sources) == 0 {
 		ux.PrintUsage()
 		os.Exit(1)
