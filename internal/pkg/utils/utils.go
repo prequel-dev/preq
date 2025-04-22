@@ -17,8 +17,6 @@ import (
 	"time"
 
 	"github.com/prequel-dev/prequel-compiler/pkg/parser"
-	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -111,123 +109,11 @@ func ParseRulesPath(path string) (*parser.RulesT, error) {
 	}
 	defer close()
 
-	return ParseRules(reader)
+	return parser.Read(reader)
 }
 
 func ParseRules(rdr io.Reader) (*parser.RulesT, error) {
-	var (
-		dupes  = make(map[string]struct{})
-		config = &parser.RulesT{
-			Rules: make([]parser.ParseRuleT, 0),
-			Terms: make(map[string]parser.ParseTermT),
-		}
-		decoder *yaml.Decoder
-		err     error
-	)
-
-	decoder = yaml.NewDecoder(rdr)
-
-LOOP:
-	for {
-
-		var sections map[string]any
-		err = decoder.Decode(&sections)
-
-		switch err {
-		case nil:
-		case io.EOF:
-			break LOOP
-		default:
-			log.Error().Err(err).Msg("Fail yaml unmarshal rules package")
-			return nil, err
-		}
-
-		for name, section := range sections {
-
-			switch name {
-			case "rules":
-
-				var (
-					rules []parser.ParseRuleT
-					b     []byte
-					ok    bool
-				)
-
-				if b, err = yaml.Marshal(section); err != nil {
-					return nil, err
-				}
-
-				if err = yaml.Unmarshal(b, &rules); err != nil {
-					return nil, err
-				}
-
-				for _, rule := range rules {
-
-					if _, ok = dupes[rule.Metadata.Hash]; ok {
-						log.Error().Str("id", rule.Metadata.Hash).Msg("Duplicate rule hash id. Aborting...")
-						return nil, fmt.Errorf("duplicate rule hash id=%s cre=%s", rule.Metadata.Hash, rule.Cre.Id)
-					}
-
-					if _, ok = dupes[rule.Metadata.Id]; ok {
-						log.Error().Str("id", rule.Metadata.Id).Msg("Duplicate rule id. Aborting...")
-						return nil, fmt.Errorf("duplicate rule id=%s cre=%s", rule.Metadata.Id, rule.Cre.Id)
-					}
-
-					if _, ok = dupes[rule.Cre.Id]; ok {
-						log.Error().Str("id", rule.Cre.Id).Msg("Duplicate rule cre id. Aborting...")
-						return nil, fmt.Errorf("duplicate rule cre id=%s cre=%s", rule.Cre.Id, rule.Cre.Id)
-					}
-
-					dupes[rule.Metadata.Hash] = struct{}{}
-					dupes[rule.Metadata.Id] = struct{}{}
-					dupes[rule.Cre.Id] = struct{}{}
-				}
-
-				config.Rules = rules
-				dupes = nil
-
-			case "terms":
-
-				if config.Terms, err = parseTerms(section); err != nil {
-					return nil, err
-				}
-
-			default:
-				// skip
-			}
-		}
-	}
-
-	return config, nil
-}
-
-func parseTerms(section any) (map[string]parser.ParseTermT, error) {
-	var err error
-
-	switch s := section.(type) {
-	case map[string]any:
-		log.Info().Int("terms", len(s)).Msg("Parsing terms section")
-
-		var (
-			terms map[string]parser.ParseTermT
-			b     []byte
-		)
-
-		if b, err = yaml.Marshal(s); err != nil {
-			return nil, err
-		}
-
-		if err = yaml.Unmarshal(b, &terms); err != nil {
-			return nil, err
-		}
-
-		return terms, nil
-
-	default:
-		log.Error().Any("section", section).Msg("Invalid terms section")
-		return nil, fmt.Errorf("invalid terms section")
-	}
-
+	return parser.Read(rdr)
 }
 
 func GunzipBytes(path string) ([]byte, error) {

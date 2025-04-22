@@ -26,6 +26,7 @@ const (
 	ErrorCategoryData   = "Data"
 	ErrorCategoryConfig = "Config"
 	ErrorCategoryAuth   = "Auth"
+	ErrorHelpData       = "https://docs.prequel.dev/timestamps"
 )
 
 const (
@@ -212,7 +213,15 @@ func AuthError(err error) error {
 
 func CategoryError(category string, err error) error {
 	fmt.Fprintf(os.Stderr, "%s error: %v\n", category, err)
+	ErrorHelp(category)
 	return err
+}
+
+func ErrorHelp(category string) {
+	switch category {
+	case ErrorCategoryData:
+		fmt.Fprintf(os.Stderr, "See %s for help resolving this error\n", ErrorHelpData)
+	}
 }
 
 func Error(err error) error {

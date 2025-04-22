@@ -3,7 +3,6 @@ rules:
       id: set-1x1
     rule:
       set:
-        window: 10s
         event:
           source: kafka
         match:

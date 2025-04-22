@@ -42,6 +42,7 @@ var (
 var cli struct {
 	Disabled      bool   `short:"d" help:"Do not run community CREs"`
 	Stop          string `short:"e" help:"Stop time"`
+	Generate      bool   `short:"g" help:"Generate data sources template"`
 	JsonLogs      bool   `short:"j" help:"Print logs in JSON format to stderr" default:"false"`
 	Skip          int    `short:"k" help:"Skip the first N lines for timestamp detection" default:"20"`
 	Level         string `short:"l" help:"Print logs at this level to stderr"`
@@ -201,11 +202,6 @@ func main() {
 		}
 	}
 
-	if len(sources) == 0 {
-		ux.PrintUsage()
-		os.Exit(1)
-	}
-
 	// Get stop time
 	if stop, err = utils.ParseTime(cli.Stop, defStop); err != nil {
 		log.Error().Err(err).Msg("Failed to parse stop time")
@@ -213,30 +209,60 @@ func main() {
 		os.Exit(1)
 	}
 
-	pw := ux.RootProgress(!useStdin)
-
 	var (
+		pw           = ux.RootProgress(!useStdin)
 		renderExit   = make(chan struct{})
+		r            = engine.New(stop, ux.NewUxCmd(pw))
+		report       = ux.NewReport(pw)
 		reportPath   string
 		ruleMatchers *engine.RuleMatchersT
 	)
+
+	defer r.Close()
+
+	if ruleMatchers, err = r.LoadRulesPaths(report, rulesPaths); err != nil {
+		log.Error().Err(err).Msg("Failed to load rules")
+		ux.RulesError(err)
+		os.Exit(1)
+	}
+
+	/*
+		if cli.Generate {
+			var (
+				//currRulesVer *semver.Version
+				//template []byte
+				err      error
+			)
+
+			if currRulesVer, _, err = rules.GetCurrentRulesVersion(defaultConfigDir); err != nil {
+				log.Error().Err(err).Msg("Failed to get current rules version")
+			}
+
+				if template, err = ruleMatchers.DataSourceTemplate(currRulesVer); err != nil {
+					log.Error().Err(err).Msg("Failed to generate data source template")
+					ux.RulesError(err)
+					os.Exit(1)
+				}
+
+				if _, err = os.Stdout.Write(template); err != nil {
+					log.Error().Err(err).Msg("Failed to write data source template")
+					ux.RulesError(err)
+					os.Exit(1)
+				}
+			os.Exit(0)
+		}
+	*/
+
+	if len(sources) == 0 {
+		ux.PrintUsage()
+		os.Exit(1)
+	}
 
 	if !cli.Quiet {
 		go func() {
 			pw.Render()
 			renderExit <- struct{}{}
 		}()
-	}
-
-	r := engine.New(stop, ux.NewUxCmd(pw))
-	defer r.Close()
-
-	report := ux.NewReport(pw)
-
-	if ruleMatchers, err = r.LoadRulesPaths(report, rulesPaths); err != nil {
-		log.Error().Err(err).Msg("Failed to load rules")
-		ux.RulesError(err)
-		os.Exit(1)
 	}
 
 	if err = r.Run(ctx, ruleMatchers, sources, report); err != nil {

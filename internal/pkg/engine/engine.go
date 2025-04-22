@@ -16,6 +16,7 @@ import (
 	"github.com/prequel-dev/prequel-compiler/pkg/compiler"
 	"github.com/prequel-dev/prequel-compiler/pkg/matchz"
 	"github.com/prequel-dev/prequel-compiler/pkg/parser"
+	"github.com/prequel-dev/prequel-compiler/pkg/pqerr"
 	"github.com/prequel-dev/prequel-compiler/pkg/schema"
 	"github.com/prequel-dev/prequel-logmatch/pkg/entry"
 	lm "github.com/prequel-dev/prequel-logmatch/pkg/match"
@@ -88,6 +89,7 @@ func compileRulePath(cf compiler.RuntimeI, path string) (compiler.ObjsT, *parser
 	)
 
 	log.Info().Str("path", path).Msg("Parsing rules")
+
 	if rules, err = utils.ParseRulesPath(path); err != nil {
 		log.Error().Err(err).Msg("Failed to parse rules")
 		return nil, nil, err
@@ -104,10 +106,7 @@ func compileRulePath(cf compiler.RuntimeI, path string) (compiler.ObjsT, *parser
 
 	nodeObjs, err = compileRuleTree(cf, tree)
 	if err != nil {
-		log.Error().Err(err).
-			Str("path", path).
-			Msg("Failed to compile rule tree")
-		return nil, nil, err
+		return nil, nil, pqerr.WithFile(err, path)
 	}
 
 	return nodeObjs, rules, nil
@@ -472,7 +471,6 @@ func (r *RuntimeT) CompileRulesPath(rulesPaths []string, report *ux.ReportT) (*R
 	runtime := r.getRuntimeCb(report)
 
 	if nodeObjs, configs, err = r.compileRulesPaths(runtime, rulesPaths); err != nil {
-		log.Error().Err(err).Msg("Failed to load rules")
 		return nil, err
 	}
 
@@ -500,7 +498,6 @@ func (r *RuntimeT) LoadRulesPaths(rep *ux.ReportT, rulesPaths []string) (*RuleMa
 	)
 
 	if ruleMatchers, err = r.CompileRulesPath(rulesPaths, rep); err != nil {
-		log.Error().Err(err).Msg("Failed to compile rules")
 		return nil, err
 	}
 
