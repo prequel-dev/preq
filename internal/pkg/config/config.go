@@ -85,6 +85,10 @@ var (
   - format: rfc3339
     pattern: |
       "timestamp"\s*:\s*"([^"]+)"
+    # Example: {"ts":"2025-03-26T14:01:02Z","level":"info", "message":"..."}
+  - format: rfc3339
+    pattern: |
+      "ts"\s*:\s*"([^"]+)"
     # Example: {"Id":19,"Version":1,"Opcode":13,"RecordId":1493,"LogName":"System","ProcessId":4324,"ThreadId":10456,"MachineName":"windows","TimeCreated":"\/Date(1743448267142)\/"}
   - format: epochany # Windows Get-Events JSON output
     pattern: |
