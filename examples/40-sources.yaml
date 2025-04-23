@@ -1,26 +1,23 @@
 version: 0.0.1
 sources:
-  - name: myhadoop
-    type: hadoop-hdfs
-    desc: "HDFSv2"
+  - name: example-1
+    type: cre.log.rabbitmq
+    desc: "Example 1"
     locations:
-      - type: log
-        timestamp:
-          regex: "^(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2},\\d{3}) "
-          format: "2006-01-02 15:04:05,999"
-        path: /server/node_logs/hadoop-hdfs-datanode-mesos-*.log
-  - name: my-gke-metrics
-    type: gke-metrics-agent
-    desc: "gke metrics-agent"
+      - path: ./examples/26-example.log
+  - name: example-2
+    type: cre.log.django
+    desc: "Example 2"
     locations:
-      - type: log
-        timestamp:
-          regex: "^\uFEFF?(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}), "
-          format: "2006-01-02 15:04:05"
-        path: /home/tony/Downloads/logs/Windows.log
-  - name: mysyslog
-    type: syslog
-    desc: "Sample syslog"
+      - path: ./examples/25-example.log
+  - name: example-3
+    type: cre.log.nginx
+    desc: "Example 3"
     locations:
-      - type: log
-        path: /var/log/syslog
+      - path: ./examples/28-example.log
+  - name: example-4
+    type: cre.log.kafka
+    desc: "Example 4"
+    locations:
+      - path: ./examples/23-example.log
+      - path: ./examples/29-example.log

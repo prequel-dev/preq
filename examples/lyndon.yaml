@@ -1,8 +1,0 @@
-rules:
-  - rule:
-      set:
-        event:
-          source: log
-        match:
-          - "HIM workspace unauthorized to Terraform Cloud"
-          - "Failed to create workspace. Status code: 401, Response: {\"errors\":[{\"status\":\"401\",\"title\":\"unauthorized\"}]}"

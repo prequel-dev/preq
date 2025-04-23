@@ -6,6 +6,6 @@ rules:
     rule:
       set:
         event:
-          source: kafka
+          source: cre.log.kafka
         negate: # Negates may not be used without positive conditions
           - "foo(.+)bar"

@@ -25,12 +25,11 @@ import (
 )
 
 const (
-	tlsPort      = 8080
-	udpPort      = 8081
-	defStop      = "+inf"
-	baseAddr     = "api-beta.prequel.dev"
-	configFile   = "config.yaml"
-	stdoutReport = "-"
+	tlsPort    = 8080
+	udpPort    = 8081
+	defStop    = "+inf"
+	baseAddr   = "api-beta.prequel.dev"
+	configFile = "config.yaml"
 )
 
 var (
@@ -299,13 +298,16 @@ LOOP:
 	}
 
 	switch {
-	case cli.Filename == stdoutReport:
+	case report.Size() == 0:
+		log.Debug().Msg("No CREs found")
+		os.Exit(0)
+	case cli.Filename == ux.OutputStdout:
 		if err = report.PrintReport(); err != nil {
 			log.Error().Err(err).Msg("Failed to print report")
 			ux.RulesError(err)
 			os.Exit(1)
 		}
-	case cli.Filename != "":
+	default:
 		if reportPath, err = report.Write(cli.Filename); err != nil {
 			log.Error().Err(err).Msg("Failed to write full report")
 			ux.RulesError(err)

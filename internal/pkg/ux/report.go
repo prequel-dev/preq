@@ -216,6 +216,12 @@ func (r *ReportT) PrintReport() error {
 	return nil
 }
 
+func (r *ReportT) Size() int {
+	r.mux.Lock()
+	defer r.mux.Unlock()
+	return len(r.CreHits)
+}
+
 func (r *ReportT) CreateReport() (any, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()

@@ -6,6 +6,6 @@ rules:
     rule:
       set:
         event:
-          source: kafka
+          source: cre.log.kafka
         match:
           - jq: ".event == \"worker_process_crash\""

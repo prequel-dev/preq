@@ -6,6 +6,6 @@ rules:
     rule:
       set:
         event:
-          source: kafka
+          source: cre.log.kafka
         match:
           - value: "[emerg] 1655#1655: still could not bind()"

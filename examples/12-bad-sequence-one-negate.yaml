@@ -6,6 +6,6 @@ rules:
     rule:
       sequence:
         event:
-          source: kafka
+          source: cre.log.kafka
         negate:
           - regex: "foo(.+)bar" # one negate condition not allowed

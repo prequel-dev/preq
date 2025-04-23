@@ -7,7 +7,7 @@ rules:
       set:
         window: 1s
         event:
-          source: kafka
+          source: cre.log.kafka
         match:
           - value: "test"
           - regex: "foo(.+)bar"

@@ -40,6 +40,7 @@ const (
 )
 
 const (
+	OutputStdout              = "-"
 	dataSourceTemplateHeader1 = "# See https://docs.prequel.dev/data-sources for how to customize this template with your own data sources\n"
 	dataSourceTemplateHeader2 = "# Remove any data sources that are not running on this system\n"
 	dataSourceTemplateHeader3 = "# Add custom timestamp formats to the data sources if they are not already supported by default (see https://docs.prequel.dev/timestamps)\n"
@@ -263,7 +264,7 @@ func WriteDataSourceTemplate(name string, ver *semver.Version, template []byte) 
 	switch name {
 	case "":
 		name = dataSourceName
-	case "-":
+	case OutputStdout:
 		fmt.Fprint(os.Stdout, header)
 		fmt.Fprint(os.Stdout, string(template))
 		return "", nil

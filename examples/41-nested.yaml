@@ -19,7 +19,7 @@ terms:
     sequence:
       window: 10s
       event:
-        source: rabbitmq
+        source: cre.log.rabbitmq
         origin: true
       order:
         - value: Discarding message
@@ -30,7 +30,7 @@ terms:
   term2:
     set:
       event:
-        source: k8s
+        source: cre.prequel.k8s
       match:
         - field: "reason"
           value: "NodeShutdown"
@@ -43,18 +43,18 @@ terms:
         - sequence:
             window: 1s
             event:
-              source: nginx
+              source: cre.log.nginx
             order:
               - error message
               - shutdown
         - set:
             event:
-              source: nginx
+              source: cre.log.nginx
             match:
               - 90%
         - set:
             event:
-              source: k8s
+              source: cre.prequel.k8s
             match:
               - field: "reason"
                 value: "Killing"
