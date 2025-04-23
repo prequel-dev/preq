@@ -1,16 +1,20 @@
 # preq
 
-`preq` (prounounced "preek") is a free and open community-driven reliability problem detector. Use `preq` to:
+`preq` (prounounced "preek") is a free and open community-driven reliability problem detector
+
+[Documentation](https://docs.prequel.dev/cres/introduction) | [Slack](https://prequel-dev.slack.com/) | [Playground](https://play.prequel.dev/) | [Mailing List](https://www.detect.sh)
+
+---
+
+Use `preq` to:
 
 - detect the latest bugs, misconfigurations, anti-patterns, and known issues from a community of practitioners
 - provide engineers, on-call support, and SRE agents with impact and community recommended mitigations
-- hunt for new problems in logs, metrics, and traces
-
-Learn more at https://docs.prequel.dev.
+- hunt for new problems in distributed systems
 
 ## Overview
 
-`preq` provides the latest Common Reliability Enumerations (CREs) created by the community and Prequel's Reliability Research Team. Reliability Intelligence from CREs helps teams see the most problems and see them first so they can prioritize, pinpoint, and act to mitigate outages.
+`preq` uses Common Reliability Enumerations (CREs) created by the problem detection community and Prequel's Reliability Research Team to detect reliability problems. Reliability Intelligence from CREs helps teams see the most problems and see them first so they can prioritize, pinpoint, and act to mitigate outages.
 
 `preq` is powered by a rules engine that performs distributed matching and correlation of sequences of events across logs, metrics, traces, and other data sources to detect reliability problems. CREs provides accurate and timely context for a human or SRE agent to take action on problems.
 

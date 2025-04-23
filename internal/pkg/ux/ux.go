@@ -48,7 +48,7 @@ const (
 )
 
 const (
-	authUrlFmt         = "Attempting to automatically open SSO authorization in your default browser.\nIf the browser does not open or you wish to use a different device to authorize this request, open the following URL: \n\n%s\n\n"
+	authUrlFmt         = "Automatic updates of community CREs and new releases of preq are available to users for free.\nTo receive secure updates, complete the OAuth 2.0 device code process. You will not be prompted to do this again until the token expires in 3 months.\n\nAttempting to automatically open SSO authorization in your default browser.\nIf the browser does not open or you wish to use a different device to authorize this request, open the following URL: \n\n%s\n\n"
 	emailVerifyTitle   = "\nYou're one step away! Please verify your email\n"
 	emailVerifyBodyFmt = "It looks like your email (%s) has not been verified yet. Check your inbox for a verification link from "
 	emailVerifyFooter  = " and click it to activate your account. If you do not see the email, check your spam folder.\n\nSee https://docs.prequel.dev/updates for more information.\n\n"
