@@ -23,6 +23,7 @@ var (
 
 const (
 	expectedArgs = 3
+	defaultSkip  = 50
 )
 
 type ResultT struct {
@@ -103,6 +104,8 @@ func detectWrapper(ctx context.Context) js.Func {
 		}
 
 		opts := c.ResolveOpts()
+		opts = append(opts, resolve.WithTimestampTries(defaultSkip))
+
 		if sources, err = resolve.PipeWasm([]byte(inputData), opts...); err != nil {
 			log.Error().Err(err).Msg("Failed to create pipe reader")
 			return errJson(err)
@@ -137,18 +140,6 @@ func detectWrapper(ctx context.Context) js.Func {
 	})
 
 	return detectFunc
-}
-
-func prettyJson(input string) (string, error) {
-	var raw any
-	if err := json.Unmarshal([]byte(input), &raw); err != nil {
-		return "", err
-	}
-	pretty, err := json.MarshalIndent(raw, "", "  ")
-	if err != nil {
-		return "", err
-	}
-	return string(pretty), nil
 }
 
 func main() {

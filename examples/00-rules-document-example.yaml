@@ -1,9 +1,9 @@
 rules:
   - cre:
-      id: cre-2025-0
+      id: cre-2025-0000
     metadata:
-      id: rule-id-0
-      hash: rule-hash-0
+      id: mC5rnfG5qz4TyHNscXKuJL
+      hash: cBsS3QQY1fwPVFUfYkKtHQ
     rule:
       set:
         window: 5s
@@ -13,10 +13,10 @@ rules:
           - commonExpression1
           - "this is another match"
   - cre:
-      id: cre-2025-1
+      id: cre-2025-0001
     metadata:
-      id: rule-id-0
-      hash: rule-hash-1
+      id: nC5rnfG5qz4TyHNscXKuJL
+      hash: dBsS3QQY1fwPVFUfYkKtHQ
     rule:
       sequence:
         window: 10s

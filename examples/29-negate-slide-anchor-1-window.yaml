@@ -2,7 +2,8 @@ rules:
   - cre:
       id: neg-all-opts
     metadata:
-      id: rule-id
+      id: XZUx7gkmbkc3BQSadKeSk4
+      hash: Vgs91FMjNCPMJF81xUm4UZ
     rule:
       set:
         event:

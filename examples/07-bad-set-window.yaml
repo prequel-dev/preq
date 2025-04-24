@@ -2,7 +2,8 @@ rules:
   - cre:
       id: bad-window
     metadata:
-      id: rule-id
+      id: JYRdT16mrXf6WmesK6LzUc
+      hash: gWxiVWqJtRNNbaapTrzbxU
     rule:
       set:
         # missing window

@@ -2,7 +2,8 @@ rules:
   - cre:
       id: set-negative
     metadata:
-      id: rule-id
+      id: 5zwKegrhCpf86okDM7qVYc
+      hash: awacKg539rEvgkEngk679x
     rule:
       set:
         window: 10s

@@ -2,7 +2,8 @@ rules:
   - cre:
       id: seq-example-2
     metadata:
-      id: rule-id
+      id: VPnEyus1uAudzNL8nMaqm2
+      hash: MHXNJnG7cYEr8FLrpndsLZ
     rule:
       sequence:
         event:

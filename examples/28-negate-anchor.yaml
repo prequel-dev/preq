@@ -2,7 +2,8 @@ rules:
   - cre:
       id: negate-anchor
     metadata:
-      id: rule-id
+      id: CQmArNYk7PziNhfsVruuTD
+      hash: NN36Tt1K7W8h6s3xKkdVtZ
     rule:
       set:
         event:

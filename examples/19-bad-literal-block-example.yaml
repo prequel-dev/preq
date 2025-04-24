@@ -2,7 +2,8 @@ rules:
   - cre:
       id: bad-yaml-literal-block
     metadata:
-      id: rule-id
+      id: 2o278NtyqfoNacFrGHkm3d
+      hash: 59b7HHeeZwvgtyYbe2WaT9
     rule:
       set:
         event:

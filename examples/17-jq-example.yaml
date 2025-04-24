@@ -2,7 +2,8 @@ rules:
   - cre:
       id: jq-example-1
     metadata:
-      id: rule-id
+      id: Zb8k3w7yYLWxKdy6yYcj8z
+      hash: k7SDcit3z8pMY5rqVUs3AC
     rule:
       set:
         event:

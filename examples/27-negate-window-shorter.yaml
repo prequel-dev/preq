@@ -2,7 +2,8 @@ rules:
   - cre:
       id: negate-window-shorter
     metadata:
-      id: rule-id
+      id: G1VtCxz7hPVwH1LCpJbdZr
+      hash: Mp4NrH8nea7oy1VVbMSWvC
     rule:
       set:
         event:

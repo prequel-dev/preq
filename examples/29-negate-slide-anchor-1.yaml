@@ -2,7 +2,8 @@ rules:
   - cre:
       id: negate-slide-anchor
     metadata:
-      id: rule-id
+      id: 9AMcopuDdzsQJjjxYSBgnt
+      hash: mRMBKh5pgxTTpHF7J65rKc
     rule:
       set:
         event:

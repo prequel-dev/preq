@@ -2,7 +2,8 @@ rules:
   - cre:
       id: negate-bad-anchor
     metadata:
-      id: rule-id
+      id: htJPAEEN63dcawBaiMVLG8
+      hash: 7CdKXQgLEBTq6WyTs7RXbd
     rule:
       set:
         event:

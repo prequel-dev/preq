@@ -2,7 +2,8 @@ rules:
   - cre:
       id: bad-negate
     metadata:
-      id: rule-id
+      id: 5QiBd6c1NhVhmfD43TQTUp
+      hash: kkqfjvotUX2gPnTuv34rNU
     rule:
       set:
         event:

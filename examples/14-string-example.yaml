@@ -2,7 +2,8 @@ rules:
   - cre:
       id: string-example-2
     metadata:
-      id: rule-id
+      id: pe77KnYc8daXGDnP2nTN2k
+      hash: kHuH898oQS8UyroaXb4bf4
     rule:
       set:
         event:

@@ -1,6 +1,9 @@
 rules:
   - cre:
       id: bad-seq-example-1
+    metadata:
+      id: 3w1ah9rYzgTTm3feZD2sEt
+      hash: TkJTNpVWgWrnE7HjmbNTSc
     rule:
       sequence:
         event:

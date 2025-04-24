@@ -2,7 +2,8 @@ rules:
   - cre:
       id: nested-example
     metadata:
-      id: rule-id
+      id: 4t48r67AjGo5QG9yCtgXQq
+      hash: RLCmWA91nBLTSdmw5dprkq
     rule:
       sequence:
         window: 30s

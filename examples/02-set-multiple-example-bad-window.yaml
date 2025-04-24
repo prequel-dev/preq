@@ -2,7 +2,8 @@ rules:
   - cre:
       id: set-example-2
     metadata:
-      id: rule-id
+      id: EnaMNTt5czTj5kXERzjnCA
+      hash: vFLA3MfPRhzKLLDCyUm7HM
     rule:
       set:
         window: 1s

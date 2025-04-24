@@ -2,7 +2,8 @@ rules:
   - cre:
       id: bad-seq-one-negate-condition
     metadata:
-      id: rule-id
+      id: AbyQH7oFWG5CoWZr8mpKph
+      hash: DmHG6sGA9yarH25oxVFDEZ
     rule:
       sequence:
         event:

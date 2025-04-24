@@ -2,7 +2,8 @@ rules:
   - cre:
       id: negate-window
     metadata:
-      id: rule-id
+      id: ymoAXHpdkpSoGgirhVie4d
+      hash: Nox2VQXTPAFbuSh5GBVssB
     rule:
       set:
         event:

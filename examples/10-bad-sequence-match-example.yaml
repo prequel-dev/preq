@@ -2,7 +2,8 @@ rules:
   - cre:
       id: bad-seq-match
     metadata:
-      id: rule-id
+      id: 7DEQGUdv2MDNsPLDABDBq5
+      hash: 1LBvYS5ZTGdAY3ApjE3TR6
     rule:
       sequence:
         event:

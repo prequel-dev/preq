@@ -2,7 +2,8 @@ rules:
   - cre:
       id: negate-example
     metadata:
-      id: rule-id
+      id: xv3JdgtRShwMrj8rX5mi6p
+      hash: QXooQcifDGLxtZKYYt2Nvb
     rule:
       sequence:
         event:

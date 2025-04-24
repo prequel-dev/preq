@@ -2,7 +2,8 @@ rules:
   - cre:
       id: negate-options-1x1
     metadata:
-      id: rule-id
+      id: gJeoP8hPeNuGN7XhcJdPKN
+      hash: K7z17XgLcbLnpYHtTvaX7X
     rule:
       set:
         event:
