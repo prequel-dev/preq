@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/prequel-dev/preq/internal/pkg/timez"
 	"github.com/prequel-dev/preq/internal/pkg/verz"
 	"github.com/prequel-dev/prequel-logmatch/pkg/format"
 
@@ -238,7 +239,7 @@ func ErrorHelp(category string, err error) {
 
 func ErrorHelpData(err error) {
 	switch err {
-	case format.ErrMatchTimestamp:
+	case format.ErrMatchTimestamp, timez.ErrInvalidTimestampFormat:
 		fmt.Fprintf(os.Stderr, "See %s for help resolving this error\n", ErrorHelpDataStr)
 	}
 }
