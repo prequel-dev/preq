@@ -10,6 +10,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	DefaultSkip = 50
+)
+
 var (
 	ErrInvalidTimestampFormat = errors.New("invalid timestamp format")
 )

@@ -30,6 +30,7 @@ const (
 	ErrorCategoryConfig = "Config"
 	ErrorCategoryAuth   = "Auth"
 	ErrorHelpDataStr    = "https://docs.prequel.dev/timestamps"
+	avatarUrl           = "https://lh6.googleusercontent.com/proxy/4BxU9vs8qEDhtBzF4oSspqVc_QPoiDRnGFqiCQzmePDxRvumx50mipYIrY7w1_wGrVPo9AihBQpoAR3oENkd7jNfWLmLWgZZ2GpW71dVblKLcjQsLQgB7p1ZxNHYS-v9tg"
 )
 
 const (
@@ -64,6 +65,28 @@ const (
 	usageExample1      = "  cat data.log | %s\n"
 	usageExample2      = "  kubectl logs nginx-pod | %s\n"
 	versionTmpl        = "%s %s %s %s/%s %s\n%s\n\n"
+)
+
+const (
+	KrewUsage     = "kubectl preq POD [-c container]"
+	KrewDescShort = "Use common reliability enumerations (CREs) to detect problems"
+	KrewDescLong  = `
+preq (prounounced "preek") is a free and open community-driven reliability problem detector. Use preq to:
+
+- detect the latest bugs, misconfigurations, anti-patterns, and known issues from a community of practitioners
+- provide engineers, on-call support, and SRE agents with impact and community recommended mitigations
+- hunt for new problems in logs
+
+preq is powered by Common Reliability Enumerations (CREs) that are contributed by the problem detection community and Prequel's Reliability Research Team. Reliability intelligence helps teams see a broad range of problems earlier, so they can prioritize, pinpoint, and reduce the risk of outages.
+
+Visit https://docs.prequel.dev for more information.
+
+Happy hunting!`
+
+	KrewExamples = `
+  Detect problems in a pod named 'postgresql' in the 'default' namespace
+   $ kubectl preq --namespace default POD --container postgresql
+`
 )
 
 type UxFactoryI interface {

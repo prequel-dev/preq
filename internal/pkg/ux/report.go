@@ -1,13 +1,17 @@
 package ux
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"sort"
 	"sync"
 	"time"
 
+	"github.com/avast/retry-go/v4"
 	"github.com/prequel-dev/prequel-compiler/pkg/matchz"
 	"github.com/prequel-dev/prequel-compiler/pkg/parser"
 
@@ -26,6 +30,11 @@ const (
 	colorMedium   = text.FgHiMagenta
 	colorLow      = text.FgHiGreen
 	reportFmt     = "preq-report-%d.json"
+)
+
+var (
+	retries = uint(3)
+	delay   = time.Second * 5
 )
 
 type ReportT struct {
@@ -260,8 +269,67 @@ func (r *ReportT) createReport() (any, error) {
 
 		o["hits"] = matchHits
 		out = append(out, o)
-
 	}
 
 	return out, nil
+}
+
+func (r *ReportT) PostSlackDetection(ctx context.Context, url string, notificationContext string) error {
+	return r.postSlackDetection(ctx, url, notificationContext)
+}
+
+func (r *ReportT) postSlackDetection(ctx context.Context, url, notificationContext string) error {
+
+	var (
+		notification string
+		msg          = make(map[string]any)
+		jsonData     []byte
+		err          error
+	)
+
+	notification = fmt.Sprintf("preq detection [%s]: ", notificationContext)
+
+	for creId := range r.CreHits {
+		notification += fmt.Sprintf("%s (%d), ", creId, r.Rules[creId].Cre.Severity)
+	}
+
+	// remove the last comma
+	notification = notification[:len(notification)-2]
+	msg["text"] = notification
+
+	jsonData, err = json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+
+	httpRequest, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	httpRequest.Header.Set("Accept", "application/json")
+
+	client := &http.Client{}
+
+	return retry.Do(
+		func() error {
+
+			resp, err := client.Do(httpRequest)
+			if err != nil {
+				log.Error().Err(err).Msg("Fail client.Do()")
+				return err
+			}
+			defer resp.Body.Close()
+
+			return nil
+		},
+		retry.Attempts(retries),
+		retry.Delay(delay),
+		retry.Context(ctx),
+		retry.OnRetry(func(u uint, err error) {
+			log.Error().Err(err).Uint("retry", u).Msg("Retry token poll error")
+		}),
+		retry.DelayType(retry.BackOffDelay),
+		retry.LastErrorOnly(true),
+	)
 }

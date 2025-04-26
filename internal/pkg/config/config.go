@@ -155,6 +155,7 @@ type Config struct {
 	RulesVersion     string         `yaml:"rulesVersion"`
 	AcceptUpdates    bool           `yaml:"acceptUpdates"`
 	DataSources      string         `yaml:"dataSources"`
+	SlackWebhook     string         `yaml:"slackWebhook"`
 }
 
 type Rules struct {

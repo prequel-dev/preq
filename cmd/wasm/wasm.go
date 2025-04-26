@@ -11,6 +11,7 @@ import (
 	"github.com/prequel-dev/preq/internal/pkg/config"
 	"github.com/prequel-dev/preq/internal/pkg/engine"
 	"github.com/prequel-dev/preq/internal/pkg/resolve"
+	"github.com/prequel-dev/preq/internal/pkg/timez"
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/preq/internal/pkg/verz"
@@ -23,7 +24,6 @@ var (
 
 const (
 	expectedArgs = 3
-	defaultSkip  = 50
 )
 
 type ResultT struct {
@@ -104,7 +104,7 @@ func detectWrapper(ctx context.Context) js.Func {
 		}
 
 		opts := c.ResolveOpts()
-		opts = append(opts, resolve.WithTimestampTries(defaultSkip))
+		opts = append(opts, resolve.WithTimestampTries(timez.DefaultSkip))
 
 		if sources, err = resolve.PipeWasm([]byte(inputData), opts...); err != nil {
 			log.Error().Err(err).Msg("Failed to create pipe reader")

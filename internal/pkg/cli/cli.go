@@ -13,6 +13,7 @@ import (
 	"github.com/prequel-dev/preq/internal/pkg/engine"
 	"github.com/prequel-dev/preq/internal/pkg/resolve"
 	"github.com/prequel-dev/preq/internal/pkg/rules"
+	"github.com/prequel-dev/preq/internal/pkg/timez"
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/prequel-compiler/pkg/datasrc"
@@ -20,21 +21,22 @@ import (
 )
 
 var Options struct {
-	Disabled      bool   `short:"d" help:"Do not run community CREs"`
-	Stop          string `short:"e" help:"Stop time"`
-	Generate      bool   `short:"g" help:"Generate data sources template"`
-	JsonLogs      bool   `short:"j" help:"Print logs in JSON format to stderr" default:"false"`
-	Skip          int    `short:"k" help:"Skip the first N lines for timestamp detection" default:"50"`
-	Level         string `short:"l" help:"Print logs at this level to stderr"`
-	Filename      string `short:"n" help:"Report or data source template output file name"`
-	Quiet         bool   `short:"q" help:"Quiet mode, do not print progress"`
-	Rules         string `short:"r" help:"Path to a CRE file"`
-	Source        string `short:"s" help:"Path to a data source file"`
-	Format        string `short:"t" help:"Format to use for timestamps"`
-	Version       bool   `short:"v" help:"Print version and exit"`
-	Window        string `short:"w" help:"Reorder lookback window duration"`
-	Regex         string `short:"x" help:"Regex to match for extracting timestamps"`
-	AcceptUpdates bool   `short:"y" help:"Accept updates to rules or new release"`
+	SlackNotification bool   `short:"a" help:"Send a Slack notification to the configured webhook when one or more CRE is detected"`
+	Disabled          bool   `short:"d" help:"Do not run community CREs"`
+	Stop              string `short:"e" help:"Stop time"`
+	Generate          bool   `short:"g" help:"Generate data sources template"`
+	JsonLogs          bool   `short:"j" help:"Print logs in JSON format to stderr" default:"false"`
+	Skip              int    `short:"k" help:"Skip the first N lines for timestamp detection"`
+	Level             string `short:"l" help:"Print logs at this level to stderr"`
+	Name              string `short:"o" help:"Report output name, generated data source template name, or notification context name"`
+	Quiet             bool   `short:"q" help:"Quiet mode, do not print progress"`
+	Rules             string `short:"r" help:"Path to a CRE rules file"`
+	Source            string `short:"s" help:"Path to a data source Yaml file"`
+	Format            string `short:"t" help:"Format to use for timestamps"`
+	Version           bool   `short:"v" help:"Print version and exit"`
+	Window            string `short:"w" help:"Reorder lookback window duration"`
+	Regex             string `short:"x" help:"Regex to match for extracting timestamps"`
+	AcceptUpdates     bool   `short:"y" help:"Accept updates to rules or new release"`
 }
 
 var (
@@ -136,6 +138,10 @@ func InitAndExecute(ctx context.Context) error {
 		c.Rules.Disabled = true
 	}
 
+	if Options.Skip == 0 {
+		Options.Skip = timez.DefaultSkip
+	}
+
 	rulesPaths, err = rules.GetRules(ctx, c, defaultConfigDir, Options.Rules, token, ruleUpdateFile, baseAddr, tlsPort, udpPort)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get rules")
@@ -212,7 +218,7 @@ func InitAndExecute(ctx context.Context) error {
 			return err
 		}
 
-		if fn, err = ux.WriteDataSourceTemplate(Options.Filename, currRulesVer, template); err != nil {
+		if fn, err = ux.WriteDataSourceTemplate(Options.Name, currRulesVer, template); err != nil {
 			log.Error().Err(err).Msg("Failed to write data source template")
 			ux.DataError(err)
 			return err
@@ -266,12 +272,27 @@ LOOP:
 		}
 	}
 
+	log.Info().
+		Str("slack_webhook", c.SlackWebhook).
+		Bool("slack_notification", Options.SlackNotification).
+		Msg("Slack webhook")
+
 	switch {
 	case report.Size() == 0:
 		log.Debug().Msg("No CREs found")
 		return nil
 
-	case Options.Filename == ux.OutputStdout:
+	case Options.SlackNotification && c.SlackWebhook != "":
+
+		log.Debug().Msgf("Posting Slack notification to %s", c.SlackWebhook)
+
+		if err = report.PostSlackDetection(ctx, c.SlackWebhook, Options.Name); err != nil {
+			log.Error().Err(err).Msg("Failed to post Slack notification")
+			ux.RulesError(err)
+			return err
+		}
+
+	case Options.Name == ux.OutputStdout:
 		if err = report.PrintReport(); err != nil {
 			log.Error().Err(err).Msg("Failed to print report")
 			ux.RulesError(err)
@@ -279,7 +300,7 @@ LOOP:
 		}
 
 	default:
-		if reportPath, err = report.Write(Options.Filename); err != nil {
+		if reportPath, err = report.Write(Options.Name); err != nil {
 			log.Error().Err(err).Msg("Failed to write full report")
 			ux.RulesError(err)
 			return err
