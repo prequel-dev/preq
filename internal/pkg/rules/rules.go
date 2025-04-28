@@ -63,6 +63,7 @@ var (
 	ErrUpdateRulesFailed = errors.New("rules update failed")
 )
 
+// Set with `-ldflags "-X github.com/prequel-dev/preq/internal/pkg/rules.krewPluginEnabled=true"`
 var (
 	krewPluginEnabled string
 )
