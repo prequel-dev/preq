@@ -99,9 +99,9 @@ func RootCmd(ctx context.Context, o *krewOptions) *cobra.Command {
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			o.pod = ""
-		} else {
 			o.pod = args[0]
+		} else {
+			o.pod = ""
 		}
 
 		if err := o.getNamespace(factory); err != nil {
