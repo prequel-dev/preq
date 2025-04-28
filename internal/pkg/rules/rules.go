@@ -63,6 +63,10 @@ var (
 	ErrUpdateRulesFailed = errors.New("rules update failed")
 )
 
+var (
+	krewPluginEnabled string
+)
+
 type PackageUrls struct {
 	DataUrl  string `json:"du,omitempty"`
 	DataSize int64  `json:"ds,omitempty"`
@@ -174,7 +178,7 @@ func syncUpdates(ctx context.Context, conf *config.Config, configDir, token, upd
 	}
 
 	// If we had a tiny response earlier, we have a full one now. If we had a full one earlier, we still have it.
-	if shouldUpdateExe(fullResp) {
+	if shouldUpdateExe(fullResp) && !isKrewPluginEnabled() {
 		if err = requestExeUpdate(ctx, fullResp, apiUrl, token, slowCheckTimeout, downloadTimeout, conf.AcceptUpdates); err != nil {
 			return "", ErrUpdateExeFailed
 		}
@@ -187,6 +191,10 @@ func syncUpdates(ctx context.Context, conf *config.Config, configDir, token, upd
 	}
 
 	return currRulesPath, nil
+}
+
+func isKrewPluginEnabled() bool {
+	return len(krewPluginEnabled) > 0
 }
 
 func fastUpdateSync(_ context.Context, addr string, timeout time.Duration) (*RuleUpdateResponse, error) {
