@@ -58,7 +58,7 @@ const (
 	emailVerifyFrom        = "updates@prequel.dev"
 	lineRefer              = "Learn more at https://docs.prequel.dev"
 	lineCopyright          = "Copyright 2025 Prequel Software, Inc. (https://prequel.dev)"
-	notificationPrefixTmpl = "preq detection [%s]: "
+	notificationPrefixTmpl = "%s"
 	rulesVersionTmpl       = "Current rules release: %s %s"
 	usageFmt               = "Usage: %s [flags]\n"
 	usageHelp              = "See --help or visit https://docs.prequel.dev for more information\n\n"
