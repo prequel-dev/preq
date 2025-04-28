@@ -98,9 +98,7 @@ func RootCmd(ctx context.Context, o *krewOptions) *cobra.Command {
 	factory := o.getCmdFactory(cmd)
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			o.pod = ""
-		} else {
+		if len(args) > 0 {
 			o.pod = args[0]
 		}
 
@@ -170,9 +168,7 @@ func runPreq(ctx context.Context, o *krewOptions) error {
 			}
 		}()
 
-		oldStdin := os.Stdin
 		os.Stdin = pr
-		defer oldStdin.Close()
 	}
 
 	logOpts := []logs.InitOpt{
