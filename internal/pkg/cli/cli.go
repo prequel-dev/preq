@@ -277,7 +277,7 @@ LOOP:
 		log.Debug().Msg("No CREs found")
 		return nil
 
-	case Options.SlackNotification && c.Notification.Type == "slack":
+	case Options.SlackNotification && c.Notification.Type == ux.NotificationSlack:
 
 		log.Debug().Msgf("Posting Slack notification to %s", c.Notification.Webhook)
 

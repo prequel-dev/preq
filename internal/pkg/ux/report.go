@@ -37,6 +37,10 @@ const (
 	reportFmt     = "preq-report-%d.json"
 )
 
+const (
+	NotificationSlack = "slack"
+)
+
 var (
 	sevWidth = max(len(sevCritical), len(sevHigh), len(sevMedium), len(sevLow))
 	retries  = uint(3)
