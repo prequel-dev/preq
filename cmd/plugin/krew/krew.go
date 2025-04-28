@@ -152,7 +152,6 @@ func runPreq(ctx context.Context, o *krewOptions) error {
 		return err
 	}
 
-	// Get logs
 	src, err := clientset.CoreV1().Pods(o.namespace).GetLogs(o.pod, &v1.PodLogOptions{
 		Container: o.container,
 	}).Stream(context.Background())
@@ -160,7 +159,6 @@ func runPreq(ctx context.Context, o *krewOptions) error {
 		return err
 	}
 
-	// Create redirect pipe
 	pr, pw, err := os.Pipe()
 	if err != nil {
 		return err
@@ -177,7 +175,6 @@ func runPreq(ctx context.Context, o *krewOptions) error {
 	os.Stdin = pr
 	defer oldStdin.Close()
 
-	// Process logs
 	logOpts := []logs.InitOpt{
 		logs.WithLevel(cli.Options.Level),
 	}
