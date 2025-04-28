@@ -99,9 +99,9 @@ func RootCmd(ctx context.Context, o *krewOptions) *cobra.Command {
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			o.pod = args[0]
-		} else {
 			o.pod = ""
+		} else {
+			o.pod = args[0]
 		}
 
 		if err := o.getNamespace(factory); err != nil {
@@ -145,7 +145,7 @@ func initConfig() {
 
 func runPreq(ctx context.Context, o *krewOptions) error {
 
-	if o.pod == "" {
+	if o.pod != "" {
 		clientset, err := kubernetes.NewForConfig(o.clientConfig)
 		if err != nil {
 			return err
