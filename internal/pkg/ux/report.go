@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -20,6 +21,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var (
+	ErrInvalidSeverity = errors.New("invalid severity")
+)
+
 const (
 	sevCritical   = "critical"
 	sevHigh       = "high"
@@ -33,8 +38,9 @@ const (
 )
 
 var (
-	retries = uint(3)
-	delay   = time.Second * 5
+	sevWidth = max(len(sevCritical), len(sevHigh), len(sevMedium), len(sevLow))
+	retries  = uint(3)
+	delay    = time.Second * 5
 )
 
 type ReportT struct {
@@ -106,6 +112,38 @@ func getColorizedCre(creId string, colors text.Colors) string {
 	return colors.Sprintf("%-20s", creId)
 }
 
+type severityT struct {
+	severity string
+	color    text.Color
+}
+
+func getSeverity(severity uint) (*severityT, error) {
+	switch severity {
+	case parser.SeverityCritical:
+		return &severityT{
+			severity: sevCritical,
+			color:    colorCritical,
+		}, nil
+	case parser.SeverityHigh:
+		return &severityT{
+			severity: sevHigh,
+			color:    colorHigh,
+		}, nil
+	case parser.SeverityMedium:
+		return &severityT{
+			severity: sevMedium,
+			color:    colorMedium,
+		}, nil
+	case parser.SeverityLow:
+		return &severityT{
+			severity: sevLow,
+			color:    colorLow,
+		}, nil
+	}
+
+	return nil, ErrInvalidSeverity
+}
+
 func (r *ReportT) DisplayCREs() error {
 	r.mux.Lock()
 	defer r.mux.Unlock()
@@ -132,33 +170,17 @@ func (r *ReportT) DisplayCREs() error {
 			continue
 		}
 
-		var (
-			color    text.Color
-			severity string
-		)
-
-		switch rule.Cre.Severity {
-		case parser.SeverityCritical:
-			severity = sevCritical
-			color = colorCritical
-		case parser.SeverityHigh:
-			severity = sevHigh
-			color = colorHigh
-		case parser.SeverityMedium:
-			severity = sevMedium
-			color = colorMedium
-		case parser.SeverityLow:
-			severity = sevLow
-			color = colorLow
+		sev, err := getSeverity(rule.Cre.Severity)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to get severity")
+			continue
 		}
-
-		const sevWidth = max(len(sevCritical), len(sevHigh), len(sevMedium), len(sevLow))
 
 		var (
 			count = getColorizedCount(len(creHits), creHits[0])
-			cre   = getColorizedCre(rule.Cre.Id, text.Colors{color, text.Bold})
+			cre   = getColorizedCre(rule.Cre.Id, text.Colors{sev.color, text.Bold})
 			tmpl  = fmt.Sprintf("%%%ds", sevWidth)
-			sevS  = text.Colors{color}.Sprintf(tmpl, severity)
+			sevS  = text.Colors{sev.color}.Sprintf(tmpl, sev.severity)
 		)
 
 		r.Pw.Log(fmt.Sprintf("%s %s %s", cre, sevS, count))
@@ -287,10 +309,15 @@ func (r *ReportT) postSlackDetection(ctx context.Context, url, notificationConte
 		err          error
 	)
 
-	notification = fmt.Sprintf("preq detection [%s]: ", notificationContext)
+	notification = fmt.Sprintf(notificationPrefixTmpl, notificationContext)
 
 	for creId := range r.CreHits {
-		notification += fmt.Sprintf("%s (%d), ", creId, r.Rules[creId].Cre.Severity)
+		sev, err := getSeverity(r.Rules[creId].Cre.Severity)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to get severity")
+			continue
+		}
+		notification += fmt.Sprintf("%s (%s), ", creId, sev.severity)
 	}
 
 	// remove the last comma
