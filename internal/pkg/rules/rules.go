@@ -194,6 +194,7 @@ func syncUpdates(ctx context.Context, conf *config.Config, configDir, token, upd
 }
 
 func isKrewPluginEnabled() bool {
+	log.Debug().Bool("enabled", len(krewPluginEnabled) > 0).Msg("Krew plugin")
 	return len(krewPluginEnabled) > 0
 }
 
