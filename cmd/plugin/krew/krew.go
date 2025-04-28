@@ -99,10 +99,10 @@ func RootCmd(ctx context.Context, o *krewOptions) *cobra.Command {
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
-			return ErrPodRequired
+			o.pod = ""
+		} else {
+			o.pod = args[0]
 		}
-
-		o.pod = args[0]
 
 		if err := o.getNamespace(factory); err != nil {
 			return err
@@ -145,35 +145,35 @@ func initConfig() {
 
 func runPreq(ctx context.Context, o *krewOptions) error {
 
-	var err error
-
-	clientset, err := kubernetes.NewForConfig(o.clientConfig)
-	if err != nil {
-		return err
-	}
-
-	src, err := clientset.CoreV1().Pods(o.namespace).GetLogs(o.pod, &v1.PodLogOptions{
-		Container: o.container,
-	}).Stream(context.Background())
-	if err != nil {
-		return err
-	}
-
-	pr, pw, err := os.Pipe()
-	if err != nil {
-		return err
-	}
-
-	go func() {
-		defer pw.Close()
-		if _, err := io.Copy(pw, src); err != nil {
-			log.Warn().Err(err).Msg("copy logs -> pipe failed")
+	if o.pod == "" {
+		clientset, err := kubernetes.NewForConfig(o.clientConfig)
+		if err != nil {
+			return err
 		}
-	}()
 
-	oldStdin := os.Stdin
-	os.Stdin = pr
-	defer oldStdin.Close()
+		src, err := clientset.CoreV1().Pods(o.namespace).GetLogs(o.pod, &v1.PodLogOptions{
+			Container: o.container,
+		}).Stream(context.Background())
+		if err != nil {
+			return err
+		}
+
+		pr, pw, err := os.Pipe()
+		if err != nil {
+			return err
+		}
+
+		go func() {
+			defer pw.Close()
+			if _, err := io.Copy(pw, src); err != nil {
+				log.Warn().Err(err).Msg("copy logs -> pipe failed")
+			}
+		}()
+
+		oldStdin := os.Stdin
+		os.Stdin = pr
+		defer oldStdin.Close()
+	}
 
 	logOpts := []logs.InitOpt{
 		logs.WithLevel(cli.Options.Level),
