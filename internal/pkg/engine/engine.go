@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/Masterminds/semver"
+	"github.com/prequel-dev/preq/internal/pkg/matchz"
 	"github.com/prequel-dev/preq/internal/pkg/resolve"
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/prequel-compiler/pkg/compiler"
 	"github.com/prequel-dev/prequel-compiler/pkg/datasrc"
-	"github.com/prequel-dev/prequel-compiler/pkg/matchz"
 	"github.com/prequel-dev/prequel-compiler/pkg/parser"
 	"github.com/prequel-dev/prequel-compiler/pkg/pqerr"
 	"github.com/prequel-dev/prequel-compiler/pkg/schema"
@@ -259,7 +259,7 @@ func validateRules(rules *parser.RulesT, allRules []*parser.RulesT) (bool, error
 
 type RuleMatchersT struct {
 	match    map[string]any
-	cb       map[string]compiler.CbMatchT
+	cb       map[string]compiler.CallbackT
 	eventSrc map[string]parser.ParseEventT
 }
 
@@ -284,17 +284,14 @@ func loadNodeObjs(objs compiler.ObjsT) (*RuleMatchersT, error) {
 	var (
 		m = &RuleMatchersT{
 			match:    make(map[string]any),
-			cb:       make(map[string]compiler.CbMatchT),
+			cb:       make(map[string]compiler.CallbackT),
 			eventSrc: make(map[string]parser.ParseEventT),
 		}
 	)
 
 	for _, obj := range objs {
 
-		var ok bool
-		if m.cb[obj.RuleId], ok = obj.Cb.Callback.(compiler.CbMatchT); !ok {
-			return nil, ErrExpectedMatcherCb
-		}
+		m.cb[obj.RuleId] = obj.Cb
 
 		switch obj.AbstractType {
 		case schema.NodeTypeLogSeq:
@@ -361,17 +358,22 @@ func NewRuntime(cb runtimeCb) *runtimeT {
 	}
 }
 
-func (r *runtimeT) NewCbMatch(params compiler.MatchParamsT) compiler.CbMatchT {
+func (r *runtimeT) NewCbMatch(params compiler.MatchParamsT) compiler.CallbackT {
 
-	return func(ctx context.Context, m matchz.HitsT) error {
+	return func(ctx context.Context, param any) error {
+		m, ok := param.(matchz.HitsT)
+		if !ok {
+			return ErrExpectedMatcherCb
+		}
+
 		m.Entity.Origin = params.Origin
 		return r.cb(params, m)
 	}
 
 }
 
-func (r *runtimeT) NewCbAssert(params compiler.AssertParamsT) compiler.CbAssertT {
-	return func(ctx context.Context) error {
+func (r *runtimeT) NewCbAssert(params compiler.AssertParamsT) compiler.CallbackT {
+	return func(context.Context, any) error {
 		return nil
 	}
 }
@@ -562,7 +564,7 @@ func (r *RuntimeT) _runSrc(ctx context.Context, wg *sync.WaitGroup, ld *LogData,
 
 	type pairT struct {
 		matcher    matchCB
-		compilerCb compiler.CbMatchT
+		compilerCb compiler.CallbackT
 	}
 
 	var (

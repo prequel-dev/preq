@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/avast/retry-go/v4"
-	"github.com/prequel-dev/prequel-compiler/pkg/matchz"
+	"github.com/prequel-dev/preq/internal/pkg/matchz"
 	"github.com/prequel-dev/prequel-compiler/pkg/parser"
 
 	"github.com/jedib0t/go-pretty/v6/progress"
