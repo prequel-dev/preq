@@ -148,14 +148,19 @@ var (
 `
 )
 
+type NotificationWebhook struct {
+	Type    string `yaml:"type"`
+	Webhook string `yaml:"webhook"`
+}
+
 type Config struct {
-	TimestampRegexes []Regex        `yaml:"timestamps"`
-	Rules            Rules          `yaml:"rules"`
-	UpdateFrequency  *time.Duration `yaml:"updateFrequency"`
-	RulesVersion     string         `yaml:"rulesVersion"`
-	AcceptUpdates    bool           `yaml:"acceptUpdates"`
-	DataSources      string         `yaml:"dataSources"`
-	SlackWebhook     string         `yaml:"slackWebhook"`
+	TimestampRegexes []Regex             `yaml:"timestamps"`
+	Rules            Rules               `yaml:"rules"`
+	UpdateFrequency  *time.Duration      `yaml:"updateFrequency"`
+	RulesVersion     string              `yaml:"rulesVersion"`
+	AcceptUpdates    bool                `yaml:"acceptUpdates"`
+	DataSources      string              `yaml:"dataSources"`
+	Notification     NotificationWebhook `yaml:"notification"`
 }
 
 type Rules struct {

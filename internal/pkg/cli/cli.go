@@ -272,21 +272,16 @@ LOOP:
 		}
 	}
 
-	log.Info().
-		Str("slack_webhook", c.SlackWebhook).
-		Bool("slack_notification", Options.SlackNotification).
-		Msg("Slack webhook")
-
 	switch {
 	case report.Size() == 0:
 		log.Debug().Msg("No CREs found")
 		return nil
 
-	case Options.SlackNotification && c.SlackWebhook != "":
+	case Options.SlackNotification && c.Notification.Type == "slack":
 
-		log.Debug().Msgf("Posting Slack notification to %s", c.SlackWebhook)
+		log.Debug().Msgf("Posting Slack notification to %s", c.Notification.Webhook)
 
-		if err = report.PostSlackDetection(ctx, c.SlackWebhook, Options.Name); err != nil {
+		if err = report.PostSlackDetection(ctx, c.Notification.Webhook, Options.Name); err != nil {
 			log.Error().Err(err).Msg("Failed to post Slack notification")
 			ux.RulesError(err)
 			return err
