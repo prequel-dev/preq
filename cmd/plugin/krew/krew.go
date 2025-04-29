@@ -150,8 +150,6 @@ func podsForSelector(ctx context.Context, cs *kubernetes.Clientset,
 		return nil, err
 	}
 
-	log.Info().Any("podList", podList.Items).Msg("podsForSelector")
-
 	return podList.Items, nil
 }
 
@@ -210,7 +208,7 @@ func getResource(r string) (resourceT, error) {
 			kind: parts[0],
 		}
 
-		log.Info().
+		log.Debug().
 			Str("name", resource.name).
 			Str("kind", resource.kind).
 			Msg("getResource")
@@ -232,8 +230,6 @@ func runPreq(ctx context.Context, o *krewOptions) error {
 	}
 
 	logs.InitLogger(logOpts...)
-
-	log.Info().Msgf("resource: %s", o.resource)
 
 	if o.resource != "" {
 
