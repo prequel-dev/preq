@@ -122,7 +122,6 @@ func RootCmd(ctx context.Context, o *krewOptions) *cobra.Command {
 	cmd.Flags().StringVarP(&cli.Options.Name, "name", "o", "", ux.HelpName)
 	cmd.Flags().BoolVarP(&cli.Options.Quiet, "quiet", "q", false, ux.HelpQuiet)
 	cmd.Flags().StringVarP(&cli.Options.Rules, "rules", "r", "", ux.HelpRules)
-	cmd.Flags().StringVarP(&cli.Options.Source, "source", "s", "", ux.HelpSource)
 	cmd.Flags().BoolVarP(&cli.Options.Version, "version", "v", false, ux.HelpVersion)
 	cmd.Flags().BoolVarP(&cli.Options.AcceptUpdates, "accept-updates", "y", false, ux.HelpAcceptUpdates)
 
