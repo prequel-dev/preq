@@ -22,7 +22,7 @@ import (
 
 var Options struct {
 	SlackNotification bool   `short:"a" help:"Send a Slack notification to the configured webhook when one or more CRE is detected"`
-	Cron              bool   `short:"c" help:"Generate Kubernetes cronjob template"`
+	Cron              bool   `short:"C" help:"Generate Kubernetes cronjob template"`
 	Disabled          bool   `short:"d" help:"Do not run community CREs"`
 	Stop              string `short:"e" help:"Stop time"`
 	Generate          bool   `short:"g" help:"Generate data sources template"`

@@ -118,6 +118,7 @@ func RootCmd(ctx context.Context, o *krewOptions) *cobra.Command {
 
 	// preq options
 	cmd.Flags().BoolVarP(&cli.Options.SlackNotification, "slack", "a", false, "Send a Slack notification to the configured webhook when one or more CRE is detected")
+	cmd.Flags().BoolVarP(&cli.Options.Cron, "cronjob", "C", false, "Generate Kubernetes cronjob template")
 	cmd.Flags().BoolVarP(&cli.Options.Disabled, "disabled", "d", false, "Do not run community CREs")
 	cmd.Flags().StringVarP(&cli.Options.Stop, "stop", "e", "", "Stop time")
 	cmd.Flags().BoolVarP(&cli.Options.JsonLogs, "json", "j", false, "Print logs in JSON format to stderr")
