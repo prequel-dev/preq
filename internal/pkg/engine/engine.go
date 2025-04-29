@@ -39,6 +39,7 @@ var (
 	ErrUnknownObjectType = errors.New("unknown object type")
 	ErrExpectedMatcherCb = errors.New("expected matcher callback")
 	ErrDuplicateRule     = errors.New("duplicate rule")
+	ErrNoRules           = errors.New("no rules provided")
 )
 
 type RuntimeT struct {
@@ -510,6 +511,10 @@ func (r *RuntimeT) LoadRulesPaths(rep *ux.ReportT, rulesPaths []string) (*RuleMa
 			continue
 		}
 		paths = append(paths, path)
+	}
+
+	if len(paths) == 0 {
+		return nil, ErrNoRules
 	}
 
 	if ruleMatchers, err = r.CompileRulesPath(paths, rep); err != nil {
