@@ -285,9 +285,11 @@ func runPreq(ctx context.Context, o *krewOptions) error {
 				}
 			}
 		}
+
+		return nil
 	}
 
-	return nil
+	return cli.InitAndExecute(ctx)
 }
 
 func redirectPodLogs(ctx context.Context, clientset *kubernetes.Clientset, namespace, pod string) error {
