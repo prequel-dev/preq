@@ -105,11 +105,21 @@ spec:
                 - -c
                 - |
                   ############
-                  # IMPORTANT: Uncomment the command in the job below to add a POD to monitor. Use labels to select the POD for a service.
-                  ############
-				  
+                  # IMPORTANT: Uncomment the command in the job below
+				  #
+				  # * If you want to monitor a pod using labels to select the POD for a service, use the following commands:
                   # POD=$(kubectl -n default get pods -l app.kubernetes.io/instance=<LABEL> -o jsonpath='{.items[0].metadata.name}')
-                  kubectl preq "$POD" -y -o "preq-cronjob-<POD>: "
+                  # kubectl preq "$POD" -y -o "preq-cronjob-<POD>: "
+				  #
+				  # * If you want to monitor pods in a deployment, use the following command:
+				  # kubectl preq deployment/<DEPLOYMENT> -y -o "preq-cronjob-<DEPLOYMENT>: "
+				  #
+				  # * If you want to monitor pods in a job, use the following command:
+				  # kubectl preq job/<JOB> -y -o "preq-cronjob-<JOB>: "
+				  #
+				  # * If you want to monitor pods in a service, use the following command:
+				  # kubectl preq service/<SERVICE> -y -o "preq-cronjob-<SERVICE>: "
+				  
               volumeMounts:
                 - name: preq-conf
                   mountPath: /.preq

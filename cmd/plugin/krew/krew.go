@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	// https://krew.sigs.k8s.io/docs/developer-guide/develop/best-practices/
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -18,6 +19,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -25,19 +28,22 @@ import (
 )
 
 var (
-	ErrPodRequired = errors.New("POD is required")
+	ErrInvalidResource = errors.New("invalid resource")
 )
 
 var (
 	KubernetesConfigFlags *genericclioptions.ConfigFlags
+	k8sDeployment         = "deployment"
+	k8sJob                = "job"
+	k8sService            = "service"
+	k8sPod                = "pod"
 )
 
 type krewOptions struct {
 	genericclioptions.IOStreams
 	flags        *genericclioptions.ConfigFlags
 	namespace    string
-	pod          string
-	container    string
+	resource     string
 	clientConfig *rest.Config
 }
 
@@ -98,7 +104,7 @@ func RootCmd(ctx context.Context, o *krewOptions) *cobra.Command {
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 {
-			o.pod = args[0]
+			o.resource = args[0]
 		}
 
 		if err := o.getNamespace(factory); err != nil {
@@ -111,9 +117,6 @@ func RootCmd(ctx context.Context, o *krewOptions) *cobra.Command {
 
 		return runPreq(ctx, o)
 	}
-
-	// kubectl-specific option
-	cmd.Flags().StringVarP(&o.container, "container", "c", o.container, "Specify the container name")
 
 	// preq options
 	cmd.Flags().BoolVarP(&cli.Options.Disabled, "disabled", "d", false, ux.HelpDisabled)
@@ -134,35 +137,95 @@ func initConfig() {
 	viper.AutomaticEnv()
 }
 
-func runPreq(ctx context.Context, o *krewOptions) error {
+func podsForSelector(ctx context.Context, cs *kubernetes.Clientset,
+	namespace string, sel map[string]string) ([]v1.Pod, error) {
 
-	if o.pod != "" {
-		clientset, err := kubernetes.NewForConfig(o.clientConfig)
-		if err != nil {
-			return err
-		}
+	labelSel := labels.SelectorFromSet(sel).String()
 
-		src, err := clientset.CoreV1().Pods(o.namespace).GetLogs(o.pod, &v1.PodLogOptions{
-			Container: o.container,
-		}).Stream(context.Background())
-		if err != nil {
-			return err
-		}
-
-		pr, pw, err := os.Pipe()
-		if err != nil {
-			return err
-		}
-
-		go func() {
-			defer pw.Close()
-			if _, err := io.Copy(pw, src); err != nil {
-				log.Warn().Err(err).Msg("copy logs -> pipe failed")
-			}
-		}()
-
-		os.Stdin = pr
+	podList, err := cs.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{
+		LabelSelector: labelSel,
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("podsForSelector")
+		return nil, err
 	}
+
+	log.Info().Any("podList", podList.Items).Msg("podsForSelector")
+
+	return podList.Items, nil
+}
+
+func podsForDeployment(ctx context.Context, cs *kubernetes.Clientset,
+	namespace, name string) ([]v1.Pod, error) {
+
+	dep, err := cs.AppsV1().Deployments(namespace).
+		Get(ctx, name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return podsForSelector(ctx, cs, namespace,
+		dep.Spec.Selector.MatchLabels)
+}
+
+func podsForJob(ctx context.Context, cs *kubernetes.Clientset,
+	namespace, name string) ([]v1.Pod, error) {
+
+	job, err := cs.BatchV1().Jobs(namespace).
+		Get(ctx, name, metav1.GetOptions{})
+	if err != nil {
+		log.Error().Err(err).Msg("podsForJob")
+		return nil, err
+	}
+
+	return podsForSelector(ctx, cs, namespace,
+		job.Spec.Selector.MatchLabels)
+}
+
+func podsForService(ctx context.Context, cs *kubernetes.Clientset,
+	namespace, svcName string) ([]v1.Pod, error) {
+
+	svc, err := cs.CoreV1().Services(namespace).
+		Get(ctx, svcName, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return podsForSelector(ctx, cs, namespace, svc.Spec.Selector)
+}
+
+type resourceT struct {
+	name string
+	kind string
+}
+
+func getResource(r string) (resourceT, error) {
+	if strings.Contains(r, "/") {
+		parts := strings.Split(r, "/")
+
+		if len(parts) != 2 {
+			return resourceT{}, fmt.Errorf("invalid resource: %s", r)
+		}
+
+		resource := resourceT{
+			name: parts[1],
+			kind: parts[0],
+		}
+
+		log.Info().
+			Str("name", resource.name).
+			Str("kind", resource.kind).
+			Msg("getResource")
+
+		return resource, nil
+	}
+
+	// Assume pod by default
+	return resourceT{
+		name: r,
+		kind: k8sPod,
+	}, nil
+}
+
+func runPreq(ctx context.Context, o *krewOptions) error {
 
 	logOpts := []logs.InitOpt{
 		logs.WithLevel(cli.Options.Level),
@@ -170,7 +233,92 @@ func runPreq(ctx context.Context, o *krewOptions) error {
 
 	logs.InitLogger(logOpts...)
 
-	cli.InitAndExecute(ctx)
+	log.Info().Msgf("resource: %s", o.resource)
+
+	if o.resource != "" {
+
+		var (
+			resource resourceT
+			err      error
+		)
+
+		if resource, err = getResource(o.resource); err != nil {
+			log.Error().Err(err).Str("resource", o.resource).Msg("invalid resource")
+			return err
+		}
+
+		clientset, err := kubernetes.NewForConfig(o.clientConfig)
+		if err != nil {
+			return err
+		}
+
+		switch resource.kind {
+		case k8sPod:
+			return redirectPodLogs(ctx, clientset, o.namespace, resource.name)
+		case k8sDeployment:
+			pods, err := podsForDeployment(ctx, clientset, o.namespace, resource.name)
+			if err != nil {
+				return err
+			}
+
+			for _, pod := range pods {
+				if err := redirectPodLogs(ctx, clientset, o.namespace, pod.Name); err != nil {
+					return err
+				}
+			}
+		case k8sJob:
+			pods, err := podsForJob(ctx, clientset, o.namespace, resource.name)
+			if err != nil {
+				return err
+			}
+
+			for _, pod := range pods {
+				if err := redirectPodLogs(ctx, clientset, o.namespace, pod.Name); err != nil {
+					return err
+				}
+			}
+		case k8sService:
+			pods, err := podsForService(ctx, clientset, o.namespace, resource.name)
+			if err != nil {
+				return err
+			}
+
+			for _, pod := range pods {
+				if err := redirectPodLogs(ctx, clientset, o.namespace, pod.Name); err != nil {
+					return err
+				}
+			}
+		}
+	}
 
 	return nil
+}
+
+func redirectPodLogs(ctx context.Context, clientset *kubernetes.Clientset, namespace, pod string) error {
+
+	var (
+		rdr io.ReadCloser
+		err error
+	)
+
+	rdr, err = clientset.CoreV1().Pods(namespace).GetLogs(pod, &v1.PodLogOptions{}).Stream(ctx)
+	if err != nil {
+		return err
+	}
+
+	pr, pw, err := os.Pipe()
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		defer pw.Close()
+		if _, err := io.Copy(pw, rdr); err != nil {
+			log.Warn().Err(err).Msg("copy logs -> pipe failed")
+		}
+	}()
+
+	os.Stdin = pr
+
+	return cli.InitAndExecute(ctx)
 }

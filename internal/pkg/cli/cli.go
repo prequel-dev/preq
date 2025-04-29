@@ -273,7 +273,7 @@ LOOP:
 		}
 
 		if !Options.Quiet {
-			fmt.Fprintf(os.Stdout, "Sent Slack notification\n")
+			fmt.Fprintf(os.Stdout, "\nSent Slack notification\n")
 		}
 
 	case Options.Name == ux.OutputStdout:
