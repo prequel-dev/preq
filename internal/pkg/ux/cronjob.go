@@ -109,7 +109,7 @@ spec:
                   ############
 				  
                   # POD=$(kubectl -n default get pods -l app.kubernetes.io/instance=<LABEL> -o jsonpath='{.items[0].metadata.name}')
-                  kubectl preq "$POD" -y -a -o "preq-cronjob-<POD>: "
+                  kubectl preq "$POD" -y -o "preq-cronjob-<POD>: "
               volumeMounts:
                 - name: preq-conf
                   mountPath: /.preq
