@@ -272,7 +272,9 @@ LOOP:
 			return err
 		}
 
-		fmt.Fprintf(os.Stdout, "Sent Slack notification\n")
+		if !Options.Quiet {
+			fmt.Fprintf(os.Stdout, "Sent Slack notification\n")
+		}
 
 	case Options.Name == ux.OutputStdout:
 		if err = report.PrintReport(); err != nil {
