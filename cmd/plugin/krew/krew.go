@@ -12,7 +12,6 @@ import (
 
 	"github.com/prequel-dev/preq/internal/pkg/cli"
 	"github.com/prequel-dev/preq/internal/pkg/logs"
-	"github.com/prequel-dev/preq/internal/pkg/timez"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 
 	"github.com/rs/zerolog/log"
@@ -117,21 +116,15 @@ func RootCmd(ctx context.Context, o *krewOptions) *cobra.Command {
 	cmd.Flags().StringVarP(&o.container, "container", "c", o.container, "Specify the container name")
 
 	// preq options
-	cmd.Flags().BoolVarP(&cli.Options.SlackNotification, "slack", "a", false, "Send a Slack notification to the configured webhook when one or more CRE is detected")
-	cmd.Flags().BoolVarP(&cli.Options.Cron, "cronjob", "C", false, "Generate Kubernetes cronjob template")
-	cmd.Flags().BoolVarP(&cli.Options.Disabled, "disabled", "d", false, "Do not run community CREs")
-	cmd.Flags().StringVarP(&cli.Options.Stop, "stop", "e", "", "Stop time")
-	cmd.Flags().BoolVarP(&cli.Options.JsonLogs, "json", "j", false, "Print logs in JSON format to stderr")
-	cmd.Flags().IntVarP(&cli.Options.Skip, "skip", "k", timez.DefaultSkip, "Skip the first N lines for timestamp detection")
-	cmd.Flags().StringVarP(&cli.Options.Level, "level", "l", "", "Print logs at this level to stderr")
-	cmd.Flags().StringVarP(&cli.Options.Name, "name", "o", "", "Report output name, generated data source template name, or notification context name")
-	cmd.Flags().BoolVarP(&cli.Options.Quiet, "quiet", "q", false, "Quiet mode, do not print progress")
-	cmd.Flags().StringVarP(&cli.Options.Rules, "rules", "r", "", "Path to a CRE rules file")
-	cmd.Flags().StringVarP(&cli.Options.Format, "format", "t", "", "Format to use for timestamps")
-	cmd.Flags().BoolVarP(&cli.Options.Version, "version", "v", false, "Print version and exit")
-	cmd.Flags().StringVarP(&cli.Options.Window, "window", "w", "", "Reorder lookback window duration")
-	cmd.Flags().StringVarP(&cli.Options.Regex, "regex", "x", "", "Regex to match for extracting timestamps")
-	cmd.Flags().BoolVarP(&cli.Options.AcceptUpdates, "accept-updates", "y", false, "Accept updates to rules or new release")
+	cmd.Flags().BoolVarP(&cli.Options.Disabled, "disabled", "d", false, ux.HelpDisabled)
+	cmd.Flags().BoolVarP(&cli.Options.Cron, "cronjob", "j", false, ux.HelpCron)
+	cmd.Flags().StringVarP(&cli.Options.Level, "level", "l", "", ux.HelpLevel)
+	cmd.Flags().StringVarP(&cli.Options.Name, "name", "o", "", ux.HelpName)
+	cmd.Flags().BoolVarP(&cli.Options.Quiet, "quiet", "q", false, ux.HelpQuiet)
+	cmd.Flags().StringVarP(&cli.Options.Rules, "rules", "r", "", ux.HelpRules)
+	cmd.Flags().StringVarP(&cli.Options.Source, "source", "s", "", ux.HelpSource)
+	cmd.Flags().BoolVarP(&cli.Options.Version, "version", "v", false, ux.HelpVersion)
+	cmd.Flags().BoolVarP(&cli.Options.AcceptUpdates, "accept-updates", "y", false, ux.HelpAcceptUpdates)
 
 	cobra.OnInitialize(initConfig)
 

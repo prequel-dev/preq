@@ -90,6 +90,19 @@ Happy hunting!`
 `
 )
 
+var (
+	HelpCron          = "Generate Kubernetes cronjob template"
+	HelpDisabled      = "Do not run community CREs"
+	HelpGenerate      = "Generate data sources template"
+	HelpLevel         = "Print logs at this level to stderr"
+	HelpName          = "Output name for reports, data source templates, or notifications"
+	HelpQuiet         = "Quiet mode, do not print progress"
+	HelpRules         = "Path to a CRE rules file"
+	HelpSource        = "Path to a data source Yaml file"
+	HelpVersion       = "Print version and exit"
+	HelpAcceptUpdates = "Accept updates to rules or new release"
+)
+
 type UxFactoryI interface {
 	NewBytesTracker(src string) (*progress.Tracker, error)
 	StartRuleTracker()

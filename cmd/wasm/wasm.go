@@ -70,7 +70,6 @@ func detectWrapper(ctx context.Context) js.Func {
 		var (
 			c                        *config.Config
 			cfg, inputData, ruleData string
-			stop                     int64
 			run                      *engine.RuntimeT
 			report                   *ux.ReportT
 			ruleMatchers             *engine.RuleMatchersT
@@ -98,11 +97,6 @@ func detectWrapper(ctx context.Context) js.Func {
 			return errJson(err)
 		}
 
-		if stop, err = utils.ParseTime("", "∞"); err != nil {
-			log.Error().Err(err).Msg("Failed to parse stop time")
-			return errJson(err)
-		}
-
 		opts := c.ResolveOpts()
 		opts = append(opts, resolve.WithTimestampTries(timez.DefaultSkip))
 
@@ -111,7 +105,7 @@ func detectWrapper(ctx context.Context) js.Func {
 			return errJson(err)
 		}
 
-		run = engine.New(stop, ux.NewUxWasm())
+		run = engine.New(utils.GetStopTime(), ux.NewUxWasm())
 		defer run.Close()
 
 		report = ux.NewReport(nil)

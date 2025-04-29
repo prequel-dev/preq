@@ -13,6 +13,19 @@ import (
 	"github.com/willabides/kongplete"
 )
 
+var vars = kong.Vars{
+	"disabledHelp":      ux.HelpDisabled,
+	"generateHelp":      ux.HelpGenerate,
+	"cronHelp":          ux.HelpCron,
+	"levelHelp":         ux.HelpLevel,
+	"nameHelp":          ux.HelpName,
+	"quietHelp":         ux.HelpQuiet,
+	"rulesHelp":         ux.HelpRules,
+	"sourceHelp":        ux.HelpSource,
+	"versionHelp":       ux.HelpVersion,
+	"acceptUpdatesHelp": ux.HelpAcceptUpdates,
+}
+
 func main() {
 
 	var (
@@ -22,6 +35,7 @@ func main() {
 			kong.Name(ux.ProcessName()),
 			kong.Description(ux.AppDesc),
 			kong.UsageOnError(),
+			kong.Vars(vars),
 		)
 		err error
 	)
@@ -31,14 +45,10 @@ func main() {
 		kongplete.WithPredictor("file", complete.PredictFiles("*")),
 	)
 
-	kong.Parse(&cli.Options)
+	kong.Parse(&cli.Options, vars)
 
 	logOpts := []logs.InitOpt{
 		logs.WithLevel(cli.Options.Level),
-	}
-
-	if !cli.Options.JsonLogs {
-		logOpts = append(logOpts, logs.WithPretty())
 	}
 
 	// Initialize logger first before any other logging

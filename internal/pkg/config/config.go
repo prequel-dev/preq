@@ -161,6 +161,8 @@ type Config struct {
 	AcceptUpdates    bool                `yaml:"acceptUpdates"`
 	DataSources      string              `yaml:"dataSources"`
 	Notification     NotificationWebhook `yaml:"notification"`
+	Window           time.Duration       `yaml:"window"`
+	Skip             int                 `yaml:"skip"`
 }
 
 type Rules struct {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/Masterminds/semver"
 	"github.com/prequel-dev/preq/internal/pkg/auth"
@@ -21,23 +20,16 @@ import (
 )
 
 var Options struct {
-	SlackNotification bool   `short:"a" help:"Send a Slack notification to the configured webhook when one or more CRE is detected"`
-	Cron              bool   `short:"C" help:"Generate Kubernetes cronjob template"`
-	Disabled          bool   `short:"d" help:"Do not run community CREs"`
-	Stop              string `short:"e" help:"Stop time"`
-	Generate          bool   `short:"g" help:"Generate data sources template"`
-	JsonLogs          bool   `short:"j" help:"Print logs in JSON format to stderr" default:"false"`
-	Skip              int    `short:"k" help:"Skip the first N lines for timestamp detection"`
-	Level             string `short:"l" help:"Print logs at this level to stderr"`
-	Name              string `short:"o" help:"Report output name, generated data source template name, or notification context name"`
-	Quiet             bool   `short:"q" help:"Quiet mode, do not print progress"`
-	Rules             string `short:"r" help:"Path to a CRE rules file"`
-	Source            string `short:"s" help:"Path to a data source Yaml file"`
-	Format            string `short:"t" help:"Format to use for timestamps"`
-	Version           bool   `short:"v" help:"Print version and exit"`
-	Window            string `short:"w" help:"Reorder lookback window duration"`
-	Regex             string `short:"x" help:"Regex to match for extracting timestamps"`
-	AcceptUpdates     bool   `short:"y" help:"Accept updates to rules or new release"`
+	Disabled      bool   `short:"d" help:"${disabledHelp}"`
+	Generate      bool   `short:"g" help:"${generateHelp}"`
+	Cron          bool   `short:"j" help:"${cronHelp}"`
+	Level         string `short:"l" help:"${levelHelp}"`
+	Name          string `short:"o" help:"${nameHelp}"`
+	Quiet         bool   `short:"q" help:"${quietHelp}"`
+	Rules         string `short:"r" help:"${rulesHelp}"`
+	Source        string `short:"s" help:"${sourceHelp}"`
+	Version       bool   `short:"v" help:"${versionHelp}"`
+	AcceptUpdates bool   `short:"y" help:"${acceptUpdatesHelp}"`
 }
 
 var (
@@ -56,19 +48,10 @@ const (
 
 func tsOpts(c *config.Config) []resolve.OptT {
 	opts := c.ResolveOpts()
-	if Options.Regex != "" || Options.Format != "" {
-		opts = append(opts, resolve.WithCustomFmt(Options.Regex, Options.Format))
+	if c.Window > 0 {
+		opts = append(opts, resolve.WithWindow(int64(c.Window)))
 	}
-	if Options.Window != "" {
-		window, err := time.ParseDuration(Options.Window)
-		if err != nil || window < 0 {
-			log.Error().Err(err).Msg("Failed to parse window duration")
-			ux.ConfigError(err)
-			os.Exit(1)
-		}
-		opts = append(opts, resolve.WithWindow(int64(window)))
-	}
-	opts = append(opts, resolve.WithTimestampTries(Options.Skip))
+	opts = append(opts, resolve.WithTimestampTries(c.Skip))
 	return opts
 }
 
@@ -91,7 +74,6 @@ func parseSources(fn string, opts ...resolve.OptT) ([]*resolve.LogData, error) {
 func InitAndExecute(ctx context.Context) error {
 	var (
 		c          *config.Config
-		stop       int64
 		token      string
 		rulesPaths []string
 		err        error
@@ -139,8 +121,8 @@ func InitAndExecute(ctx context.Context) error {
 		c.Rules.Disabled = true
 	}
 
-	if Options.Skip == 0 {
-		Options.Skip = timez.DefaultSkip
+	if c.Skip == 0 {
+		c.Skip = timez.DefaultSkip
 	}
 
 	rulesPaths, err = rules.GetRules(ctx, c, defaultConfigDir, Options.Rules, token, ruleUpdateFile, baseAddr, tlsPort, udpPort)
@@ -177,17 +159,10 @@ func InitAndExecute(ctx context.Context) error {
 		}
 	}
 
-	// Get stop time
-	if stop, err = utils.ParseTime(Options.Stop, defStop); err != nil {
-		log.Error().Err(err).Msg("Failed to parse stop time")
-		ux.ConfigError(err)
-		return err
-	}
-
 	var (
 		pw           = ux.RootProgress(!useStdin)
 		renderExit   = make(chan struct{})
-		r            = engine.New(stop, ux.NewUxCmd(pw))
+		r            = engine.New(utils.GetStopTime(), ux.NewUxCmd(pw))
 		report       = ux.NewReport(pw)
 		reportPath   string
 		ruleMatchers *engine.RuleMatchersT
@@ -287,7 +262,7 @@ LOOP:
 		log.Debug().Msg("No CREs found")
 		return nil
 
-	case Options.SlackNotification && c.Notification.Type == ux.NotificationSlack:
+	case c.Notification.Type == ux.NotificationSlack:
 
 		log.Debug().Msgf("Posting Slack notification to %s", c.Notification.Webhook)
 
@@ -296,6 +271,8 @@ LOOP:
 			ux.RulesError(err)
 			return err
 		}
+
+		fmt.Fprintf(os.Stdout, "Sent Slack notification\n")
 
 	case Options.Name == ux.OutputStdout:
 		if err = report.PrintReport(); err != nil {

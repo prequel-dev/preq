@@ -13,8 +13,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
-	"time"
 
 	"github.com/prequel-dev/prequel-compiler/pkg/parser"
 )
@@ -25,32 +23,8 @@ var (
 	ErrWrite = errors.New("write error")
 )
 
-func ParseTime(tstr, def string) (ts int64, err error) {
-	tstr = strings.TrimSpace(tstr)
-	if tstr == "" {
-		tstr = def
-	}
-
-	now := time.Now()
-
-	switch tstr {
-	case "now":
-		ts = now.UnixNano()
-	case "-infinity", "-inf", "-∞", "0":
-		ts = 0
-	case "infinity", "+inf", "inf", "∞", "+":
-		ts = math.MaxInt64
-	default:
-		if d, err := time.ParseDuration(tstr); err == nil {
-			ts = now.Add(d).UnixNano()
-		} else if stamp, err := time.Parse(time.RFC3339, tstr); err == nil {
-			ts = stamp.UnixNano()
-		} else {
-			return 0, fmt.Errorf("fail parse timestamp: %w", err)
-		}
-	}
-
-	return ts, nil
+func GetStopTime() (ts int64) {
+	return math.MaxInt64
 }
 
 func GetOSInfo() string {
