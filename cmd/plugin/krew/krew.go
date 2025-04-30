@@ -2,6 +2,7 @@ package krew
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -37,6 +38,7 @@ var (
 	k8sJob                = "job"
 	k8sService            = "service"
 	k8sPod                = "pod"
+	k8sConfigMap          = "configmap"
 )
 
 type krewOptions struct {
@@ -223,6 +225,65 @@ func getResource(r string) (resourceT, error) {
 	}, nil
 }
 
+func processResource(ctx context.Context, o *krewOptions) error {
+	var (
+		err      error
+		resource resourceT
+	)
+
+	if resource, err = getResource(o.resource); err != nil {
+		log.Error().Err(err).Str("resource", o.resource).Msg("invalid resource")
+		return err
+	}
+
+	clientset, err := kubernetes.NewForConfig(o.clientConfig)
+	if err != nil {
+		return err
+	}
+
+	switch resource.kind {
+	case k8sPod:
+		return redirectPodLogs(ctx, clientset, o.namespace, resource.name)
+	case k8sDeployment:
+		pods, err := podsForDeployment(ctx, clientset, o.namespace, resource.name)
+		if err != nil {
+			return err
+		}
+
+		for _, pod := range pods {
+			if err := redirectPodLogs(ctx, clientset, o.namespace, pod.Name); err != nil {
+				return err
+			}
+		}
+	case k8sJob:
+		pods, err := podsForJob(ctx, clientset, o.namespace, resource.name)
+		if err != nil {
+			return err
+		}
+
+		for _, pod := range pods {
+			if err := redirectPodLogs(ctx, clientset, o.namespace, pod.Name); err != nil {
+				return err
+			}
+		}
+	case k8sService:
+		pods, err := podsForService(ctx, clientset, o.namespace, resource.name)
+		if err != nil {
+			return err
+		}
+
+		for _, pod := range pods {
+			if err := redirectPodLogs(ctx, clientset, o.namespace, pod.Name); err != nil {
+				return err
+			}
+		}
+	case k8sConfigMap:
+		return redirectConfigMap(ctx, clientset, o.namespace, resource.name)
+	}
+
+	return nil
+}
+
 func runPreq(ctx context.Context, o *krewOptions) error {
 
 	logOpts := []logs.InitOpt{
@@ -232,62 +293,35 @@ func runPreq(ctx context.Context, o *krewOptions) error {
 	logs.InitLogger(logOpts...)
 
 	if o.resource != "" {
-
-		var (
-			resource resourceT
-			err      error
-		)
-
-		if resource, err = getResource(o.resource); err != nil {
-			log.Error().Err(err).Str("resource", o.resource).Msg("invalid resource")
-			return err
-		}
-
-		clientset, err := kubernetes.NewForConfig(o.clientConfig)
-		if err != nil {
-			return err
-		}
-
-		switch resource.kind {
-		case k8sPod:
-			return redirectPodLogs(ctx, clientset, o.namespace, resource.name)
-		case k8sDeployment:
-			pods, err := podsForDeployment(ctx, clientset, o.namespace, resource.name)
-			if err != nil {
-				return err
-			}
-
-			for _, pod := range pods {
-				if err := redirectPodLogs(ctx, clientset, o.namespace, pod.Name); err != nil {
-					return err
-				}
-			}
-		case k8sJob:
-			pods, err := podsForJob(ctx, clientset, o.namespace, resource.name)
-			if err != nil {
-				return err
-			}
-
-			for _, pod := range pods {
-				if err := redirectPodLogs(ctx, clientset, o.namespace, pod.Name); err != nil {
-					return err
-				}
-			}
-		case k8sService:
-			pods, err := podsForService(ctx, clientset, o.namespace, resource.name)
-			if err != nil {
-				return err
-			}
-
-			for _, pod := range pods {
-				if err := redirectPodLogs(ctx, clientset, o.namespace, pod.Name); err != nil {
-					return err
-				}
-			}
-		}
-
-		return nil
+		return processResource(ctx, o)
 	}
+
+	return cli.InitAndExecute(ctx)
+}
+
+func redirectConfigMap(ctx context.Context, clientset *kubernetes.Clientset, namespace, configMap string) error {
+
+	cm, err := clientset.CoreV1().ConfigMaps(namespace).Get(ctx, configMap, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	b, err := json.Marshal(cm)
+	if err != nil {
+		return err
+	}
+
+	pr, pw, err := os.Pipe()
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		defer pw.Close()
+		pw.Write(b)
+	}()
+
+	os.Stdin = pr
 
 	return cli.InitAndExecute(ctx)
 }
