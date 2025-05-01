@@ -38,7 +38,7 @@ func Detect(ctx context.Context, cfg, data, rule string) (ux.ReportDocT, ux.Stat
 	opts := c.ResolveOpts()
 	opts = append(opts, resolve.WithTimestampTries(timez.DefaultSkip))
 
-	if sources, err = resolve.PipeWasm([]byte(data), opts...); err != nil {
+	if sources, err = resolve.PipeEval([]byte(data), opts...); err != nil {
 		log.Error().Err(err).Msg("Failed to create pipe reader")
 		return nil, nil, err
 	}

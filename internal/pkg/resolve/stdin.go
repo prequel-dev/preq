@@ -23,7 +23,7 @@ func PipeStdin(opts ...OptT) ([]*LogData, error) {
 	}, nil
 }
 
-func PipeWasm(data []byte, opts ...OptT) ([]*LogData, error) {
+func PipeEval(data []byte, opts ...OptT) ([]*LogData, error) {
 	rdr, err := newPipeReader(bytes.NewReader(data), opts...)
 	if err != nil {
 		return nil, err
