@@ -257,13 +257,15 @@ func (r *ReportT) Size() int {
 	return len(r.CreHits)
 }
 
-func (r *ReportT) CreateReport() (any, error) {
+type ReportDocT []map[string]any
+
+func (r *ReportT) CreateReport() (ReportDocT, error) {
 	r.mux.Lock()
 	defer r.mux.Unlock()
 	return r.createReport()
 }
 
-func (r *ReportT) createReport() (any, error) {
+func (r *ReportT) createReport() (ReportDocT, error) {
 	var (
 		out = make([]map[string]any, 0)
 	)
@@ -313,7 +315,7 @@ func (r *ReportT) postSlackDetection(ctx context.Context, url, notificationConte
 		err          error
 	)
 
-	notification = fmt.Sprintf(notificationPrefixTmpl, notificationContext)
+	notification = notificationContext
 
 	for creId := range r.CreHits {
 		sev, err := getSeverity(r.Rules[creId].Cre.Severity)

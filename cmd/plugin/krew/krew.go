@@ -288,6 +288,7 @@ func runPreq(ctx context.Context, o *krewOptions) error {
 
 	logOpts := []logs.InitOpt{
 		logs.WithLevel(cli.Options.Level),
+		logs.WithPretty(),
 	}
 
 	logs.InitLogger(logOpts...)

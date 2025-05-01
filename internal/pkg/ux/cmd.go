@@ -107,6 +107,6 @@ func (u *UxCmdT) MarkBytesTrackerDone() {
 	u.Bytes.MarkAsDone()
 }
 
-func (u *UxCmdT) FinalStats() (map[string]any, error) {
+func (u *UxCmdT) FinalStats() (StatsT, error) {
 	return nil, ErrNotImplemented
 }

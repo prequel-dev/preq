@@ -49,6 +49,7 @@ func main() {
 
 	logOpts := []logs.InitOpt{
 		logs.WithLevel(cli.Options.Level),
+		logs.WithPretty(),
 	}
 
 	// Initialize logger first before any other logging

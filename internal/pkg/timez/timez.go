@@ -102,6 +102,8 @@ func TryTimestampFormat(exp string, fmtStr TimestampFmt, buf []byte, maxTries in
 		err     error
 	)
 
+	log.Debug().Str("exp", exp).Str("fmt", string(fmtStr)).Msg("Trying timestamp format")
+
 	if cb, err = GetTimestampFormat(fmtStr); err != nil {
 		log.Error().Err(err).Msg("Failed to get timestamp format")
 		return nil, 0, err
@@ -135,6 +137,8 @@ func TryTimestampFormat(exp string, fmtStr TimestampFmt, buf []byte, maxTries in
 	if ts == 0 {
 		return nil, 0, ErrInvalidTimestampFormat
 	}
+
+	log.Debug().Str("exp", exp).Str("fmt", string(fmtStr)).Msg("Selected timestamp format")
 
 	return factory, ts, nil
 }

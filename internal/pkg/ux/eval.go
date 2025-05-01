@@ -8,7 +8,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/progress"
 )
 
-type UxWasmT struct {
+type UxEvalT struct {
 	mux      sync.Mutex
 	Rules    uint32
 	Problems uint32
@@ -17,43 +17,43 @@ type UxWasmT struct {
 	done     chan struct{}
 }
 
-func NewUxWasm() *UxWasmT {
-	return &UxWasmT{
+func NewUxEval() *UxEvalT {
+	return &UxEvalT{
 		done: make(chan struct{}),
 	}
 }
 
-func (u *UxWasmT) StartRuleTracker() {
+func (u *UxEvalT) StartRuleTracker() {
 }
 
-func (u *UxWasmT) StartProblemsTracker() {
+func (u *UxEvalT) StartProblemsTracker() {
 }
 
-func (u *UxWasmT) IncrementRuleTracker(c int64) {
+func (u *UxEvalT) IncrementRuleTracker(c int64) {
 	u.mux.Lock()
 	defer u.mux.Unlock()
 	u.Rules++
 }
 
-func (u *UxWasmT) IncrementProblemsTracker(c int64) {
+func (u *UxEvalT) IncrementProblemsTracker(c int64) {
 	u.mux.Lock()
 	defer u.mux.Unlock()
 	u.Problems++
 }
 
-func (u *UxWasmT) IncrementLinesTracker(c int64) {
+func (u *UxEvalT) IncrementLinesTracker(c int64) {
 }
 
-func (u *UxWasmT) MarkRuleTrackerDone() {
+func (u *UxEvalT) MarkRuleTrackerDone() {
 }
 
-func (u *UxWasmT) MarkProblemsTrackerDone() {
+func (u *UxEvalT) MarkProblemsTrackerDone() {
 }
 
-func (u *UxWasmT) MarkLinesTrackerDone() {
+func (u *UxEvalT) MarkLinesTrackerDone() {
 }
 
-func (u *UxWasmT) StartLinesTracker(lines *atomic.Int64, killCh chan struct{}) {
+func (u *UxEvalT) StartLinesTracker(lines *atomic.Int64, killCh chan struct{}) {
 	go func() {
 
 	LOOP:
@@ -70,15 +70,15 @@ func (u *UxWasmT) StartLinesTracker(lines *atomic.Int64, killCh chan struct{}) {
 	}()
 }
 
-func (u *UxWasmT) NewBytesTracker(src string) (*progress.Tracker, error) {
+func (u *UxEvalT) NewBytesTracker(src string) (*progress.Tracker, error) {
 	u.Bytes = newBytesTracker(src)
 	return &u.Bytes, nil
 }
 
-func (u *UxWasmT) MarkBytesTrackerDone() {
+func (u *UxEvalT) MarkBytesTrackerDone() {
 }
 
-func (u *UxWasmT) FinalStats() (map[string]any, error) {
+func (u *UxEvalT) FinalStats() (StatsT, error) {
 
 	timeout := time.NewTimer(10 * time.Second)
 	defer timeout.Stop()
@@ -93,7 +93,7 @@ LOOP:
 		}
 	}
 
-	return map[string]any{
+	return StatsT{
 		"rules":    u.Rules,
 		"problems": u.Problems,
 		"lines":    u.Lines.Load(),
