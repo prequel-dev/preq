@@ -146,6 +146,18 @@ var (
     pattern: |
       "ts"\s*:\s*([0-9]+)(?:\.[0-9]+)?
 
+  # Example: ts=2025-03-10T13:52:40.623431174Z level=info msg="tail routine: tail channel closed...
+  # Source: Loki
+  - format: "2006-01-02T15:04:05.000000000Z"
+    pattern: |
+      ts=([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{9}Z)
+
+  # Example: {"event": "DD_API_KEY undefined. Metrics, logs and events will not be reported to DataDog", "timestamp": "2025-02-12T18:12:58.715528Z", "level": "warn...
+  # Source: DataDog
+  - format: "2006-01-02T15:04:05.000000Z"
+    pattern: |
+      "timestamp"\s*:\s*"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6}Z)"
+
   # Example: {"Id":19,"Version":1,"Opcode":13,"RecordId":1493,"LogName":"System","ProcessId":4324,"ThreadId":10456,"MachineName":"windows","TimeCreated":"\/Date(1743448267142)\/"}
   # Source; Windows events via Get-Events w/ JSON output
   - format: epochany
