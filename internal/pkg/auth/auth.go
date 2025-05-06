@@ -445,7 +445,7 @@ func Login(ctx context.Context, baseAddr, tokenPath string) (string, error) {
 		deviceAuth *DeviceAuth
 		cmd        *exec.Cmd
 		uri        *url.URL
-		apiUri     = fmt.Sprintf("https://%s:8080", baseAddr)
+		apiUri     = fmt.Sprintf("https://%s:443", baseAddr)
 		err        error
 	)
 

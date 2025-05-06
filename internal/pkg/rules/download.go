@@ -59,8 +59,6 @@ func rulesDownloadAuthRequest(ctx context.Context, retries int, baseUrl, rulesDo
 		RulesPackage: rulesDownloadPath,
 	}
 
-	fmt.Printf("package name: %s\n", rulesDownloadPath)
-
 	jsonData, err := json.Marshal(reqData)
 	if err != nil {
 		return nil, err

@@ -39,10 +39,10 @@ var (
 )
 
 const (
-	tlsPort    = 8080
+	tlsPort    = 443
 	udpPort    = 8081
 	defStop    = "+inf"
-	baseAddr   = "api-beta.prequel.dev"
+	baseAddr   = "app-beta.prequel.dev"
 	configFile = "config.yaml"
 )
 
