@@ -33,6 +33,7 @@ import (
 )
 
 const (
+	udpBaseAddr              = "api-beta.prequel.dev"
 	prequelRulesPrefix       = "prequel-public-cre-rules"
 	prequelRulesSuffix       = ".gz"
 	prequelRulesSha256Suffix = ".sha2"
@@ -153,7 +154,7 @@ func syncUpdates(ctx context.Context, conf *config.Config, configDir, token, upd
 
 	// If we don't need to do a full check in, do a fast one (~30ms)
 	if !localCheckUpdate {
-		if tinyResp, err = fastUpdateSync(ctx, fmt.Sprintf("%s:%d", baseAddr, udpPort), fastCheckTimeout); err != nil {
+		if tinyResp, err = fastUpdateSync(ctx, fmt.Sprintf("%s:%d", udpBaseAddr, udpPort), fastCheckTimeout); err != nil {
 			return currRulesPath, err
 		}
 	} else {
