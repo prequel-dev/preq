@@ -9,7 +9,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/posener/complete v1.2.3
-	github.com/prequel-dev/prequel-logmatch v0.0.12
+	github.com/prequel-dev/prequel-logmatch v0.0.13
 	github.com/rs/zerolog v1.34.0
 	github.com/willabides/kongplete v0.4.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -30,7 +30,7 @@ require (
 require (
 	github.com/cqroot/prompt v0.9.4
 	github.com/fatih/color v1.18.0
-	github.com/prequel-dev/prequel-compiler v0.0.8
+	github.com/prequel-dev/prequel-compiler v0.0.9
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.20.1
 	gopkg.in/yaml.v2 v2.4.0
