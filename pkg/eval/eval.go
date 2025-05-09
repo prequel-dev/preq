@@ -26,8 +26,7 @@ func Detect(ctx context.Context, cfg, data, rule string) (ux.ReportDocT, ux.Stat
 	)
 
 	if len(cfg) == 0 {
-		log.Warn().Msg("No config provided, using default")
-		cfg = config.DefaultConfig
+		cfg = config.Marshal()
 	}
 
 	if c, err = config.LoadConfigFromBytes(cfg); err != nil {

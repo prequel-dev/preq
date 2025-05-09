@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,7 +13,7 @@ import (
 )
 
 var (
-	DefaultConfig = `timestamps:
+	defaultConfig = `timestamps:
 
   # Example: {"level":"error","error":"context deadline exceeded","time":1744570895480541,"caller":"server.go:462"}
   - format: epochany
@@ -164,6 +165,8 @@ var (
     pattern: |
       /Date\((\d+)\)
 `
+
+	windowConfig = `window: %s`
 )
 
 type NotificationWebhook struct {
@@ -193,7 +196,39 @@ type Regex struct {
 	Format  string `yaml:"format"`
 }
 
-func LoadConfig(dir, file string) (*Config, error) {
+type OptT func(*optsT)
+
+type optsT struct {
+	window time.Duration
+}
+
+func WithWindow(window time.Duration) func(*optsT) {
+	return func(o *optsT) {
+		o.window = window
+	}
+}
+
+func parseOpts(opts ...OptT) *optsT {
+	o := &optsT{}
+	for _, opt := range opts {
+		opt(o)
+	}
+	return o
+}
+
+func Marshal(opts ...OptT) string {
+	o := parseOpts(opts...)
+
+	if o.window > 0 {
+		wcfg := fmt.Sprintf(windowConfig, o.window)
+		return fmt.Sprintf("%s\n%s\n", defaultConfig, wcfg)
+	}
+
+	return defaultConfig
+}
+
+func LoadConfig(dir, file string, opts ...OptT) (*Config, error) {
+
 	var config Config
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -203,7 +238,7 @@ func LoadConfig(dir, file string) (*Config, error) {
 	}
 
 	if _, err := os.Stat(filepath.Join(dir, file)); os.IsNotExist(err) {
-		if err := WriteDefaultConfig(filepath.Join(dir, file)); err != nil {
+		if err := WriteDefaultConfig(filepath.Join(dir, file), opts...); err != nil {
 			log.Error().Err(err).Msg("Failed to write default config")
 			return nil, err
 		}
@@ -221,8 +256,9 @@ func LoadConfig(dir, file string) (*Config, error) {
 	return &config, nil
 }
 
-func WriteDefaultConfig(path string) error {
-	return os.WriteFile(path, []byte(DefaultConfig), 0644)
+func WriteDefaultConfig(path string, opts ...OptT) error {
+	cfg := Marshal(opts...)
+	return os.WriteFile(path, []byte(cfg), 0644)
 }
 
 func LoadConfigFromBytes(data string) (*Config, error) {

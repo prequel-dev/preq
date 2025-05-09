@@ -7,7 +7,9 @@ import (
 	"encoding/json"
 	"errors"
 	"syscall/js"
+	"time"
 
+	"github.com/prequel-dev/preq/internal/pkg/config"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/preq/internal/pkg/verz"
 	"github.com/prequel-dev/preq/pkg/eval"
@@ -79,8 +81,10 @@ func detectWrapper(ctx context.Context) js.Func {
 		inputData = args[0].String()
 		ruleData = args[1].String()
 
-		reportDoc, stats, err = eval.Detect(ctx, cfg, inputData, ruleData)
-		if err != nil {
+		// Permit events to arrive out of order within a 1 hour window by default
+		cfg = config.Marshal(config.WithWindow(time.Hour))
+
+		if reportDoc, stats, err = eval.Detect(ctx, cfg, inputData, ruleData); err != nil {
 			return errJson(err)
 		}
 
