@@ -33,6 +33,7 @@ var Options struct {
 }
 
 var (
+	// https://specifications.freedesktop.org/basedir-spec/latest/
 	defaultConfigDir = filepath.Join(os.Getenv("HOME"), ".config", "preq")
 	ruleToken        = filepath.Join(defaultConfigDir, ".ruletoken")
 	ruleUpdateFile   = filepath.Join(defaultConfigDir, ".ruleupdate")
