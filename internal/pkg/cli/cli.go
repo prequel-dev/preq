@@ -33,7 +33,7 @@ var Options struct {
 }
 
 var (
-	defaultConfigDir = filepath.Join(os.Getenv("HOME"), ".preq")
+	defaultConfigDir = filepath.Join(os.Getenv("HOME"), ".config", "preq")
 	ruleToken        = filepath.Join(defaultConfigDir, ".ruletoken")
 	ruleUpdateFile   = filepath.Join(defaultConfigDir, ".ruleupdate")
 )

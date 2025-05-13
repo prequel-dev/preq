@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bufio"
 	"bytes"
 	"compress/gzip"
 	"crypto/sha256"
@@ -15,12 +16,19 @@ import (
 	"runtime"
 
 	"github.com/prequel-dev/prequel-compiler/pkg/parser"
+
+	"gopkg.in/yaml.v2"
+	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
 var (
 	ErrGzip  = errors.New("gzip error")
 	ErrRead  = errors.New("read error")
 	ErrWrite = errors.New("write error")
+)
+
+var (
+	sectionRules = "rules"
 )
 
 func GetStopTime() (ts int64) {
@@ -71,11 +79,56 @@ func OpenRulesFile(filePath string) (io.Reader, func(), error) {
 	return file, cleanup, nil
 }
 
+type rawMsgT struct {
+	unmarshal func(any) error
+}
+
+func (msg *rawMsgT) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	msg.unmarshal = unmarshal
+	return nil
+}
+
+func (msg *rawMsgT) Unmarshal(v interface{}) error {
+	return msg.unmarshal(v)
+}
+
+type rulesSectionT struct {
+	Section string  `yaml:"section"`
+	Rules   rawMsgT `yaml:"rules,omitempty"`
+}
+
+func ExtractSectionBytes(rdr io.Reader, targetSection string) ([]byte, error) {
+	yr := utilyaml.NewYAMLReader(bufio.NewReader(rdr))
+
+	for {
+		docBytes, err := yr.Read() // raw bytes up to the next '---'
+		if err != nil {
+			if err == io.EOF {
+				return nil, fmt.Errorf("section %q not found", targetSection)
+			}
+			return nil, err
+		}
+
+		var meta struct {
+			Section string `yaml:"section"`
+		}
+
+		if err := yaml.Unmarshal(docBytes, &meta); err != nil {
+			continue
+		}
+
+		if meta.Section == targetSection {
+			return docBytes, nil
+		}
+	}
+}
+
 func ParseRulesPath(path string) (*parser.RulesT, error) {
 	var (
-		reader io.Reader
-		close  func()
-		err    error
+		reader     io.Reader
+		rulesBytes []byte
+		close      func()
+		err        error
 	)
 
 	if reader, close, err = OpenRulesFile(path); err != nil {
@@ -83,7 +136,11 @@ func ParseRulesPath(path string) (*parser.RulesT, error) {
 	}
 	defer close()
 
-	return parser.Read(reader)
+	if rulesBytes, err = ExtractSectionBytes(reader, sectionRules); err != nil {
+		return nil, err
+	}
+
+	return parser.Read(bytes.NewReader(rulesBytes))
 }
 
 func ParseRules(rdr io.Reader) (*parser.RulesT, error) {
