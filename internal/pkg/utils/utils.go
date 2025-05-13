@@ -79,24 +79,6 @@ func OpenRulesFile(filePath string) (io.Reader, func(), error) {
 	return file, cleanup, nil
 }
 
-type rawMsgT struct {
-	unmarshal func(any) error
-}
-
-func (msg *rawMsgT) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	msg.unmarshal = unmarshal
-	return nil
-}
-
-func (msg *rawMsgT) Unmarshal(v interface{}) error {
-	return msg.unmarshal(v)
-}
-
-type rulesSectionT struct {
-	Section string  `yaml:"section"`
-	Rules   rawMsgT `yaml:"rules,omitempty"`
-}
-
 func ExtractSectionBytes(rdr io.Reader, targetSection string) ([]byte, error) {
 	yr := utilyaml.NewYAMLReader(bufio.NewReader(rdr))
 
@@ -123,10 +105,41 @@ func ExtractSectionBytes(rdr io.Reader, targetSection string) ([]byte, error) {
 	}
 }
 
-func ParseRulesPath(path string) (*parser.RulesT, error) {
+type ReaderOptT func(*readerOptsT)
+
+func WithMultiDoc() func(*readerOptsT) {
+	return func(o *readerOptsT) {
+		o.multiDoc = true
+	}
+}
+
+func WithGenIds() func(*readerOptsT) {
+	return func(o *readerOptsT) {
+		o.genIds = true
+	}
+}
+
+type readerOptsT struct {
+	multiDoc bool
+	genIds   bool
+}
+
+func readerOpts(opts ...ReaderOptT) *readerOptsT {
+	o := &readerOptsT{}
+	for _, opt := range opts {
+		opt(o)
+	}
+
+	return o
+}
+
+func ParseRulesPath(path string, opts ...ReaderOptT) (*parser.RulesT, error) {
+	o := readerOpts(opts...)
+
 	var (
 		reader     io.Reader
 		rulesBytes []byte
+		readOpts   = make([]parser.ParseOptT, 0)
 		close      func()
 		err        error
 	)
@@ -136,14 +149,27 @@ func ParseRulesPath(path string) (*parser.RulesT, error) {
 	}
 	defer close()
 
-	if rulesBytes, err = ExtractSectionBytes(reader, sectionRules); err != nil {
-		return nil, err
+	if o.multiDoc {
+		if rulesBytes, err = ExtractSectionBytes(reader, sectionRules); err != nil {
+			return nil, err
+		}
+		return parser.Read(bytes.NewReader(rulesBytes))
 	}
 
-	return parser.Read(bytes.NewReader(rulesBytes))
+	if o.genIds {
+		readOpts = append(readOpts, parser.WithGenIds())
+	}
+
+	return parser.Read(reader, readOpts...)
 }
 
-func ParseRules(rdr io.Reader) (*parser.RulesT, error) {
+func ParseRules(rdr io.Reader, opts ...ReaderOptT) (*parser.RulesT, error) {
+	o := readerOpts(opts...)
+
+	if o.genIds {
+		return parser.Read(rdr, parser.WithGenIds())
+	}
+
 	return parser.Read(rdr)
 }
 

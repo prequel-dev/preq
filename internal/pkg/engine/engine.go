@@ -14,6 +14,7 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/prequel-dev/preq/internal/pkg/matchz"
 	"github.com/prequel-dev/preq/internal/pkg/resolve"
+	"github.com/prequel-dev/preq/internal/pkg/rules"
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/prequel-compiler/pkg/compiler"
@@ -40,6 +41,7 @@ var (
 	ErrExpectedMatcherCb = errors.New("expected matcher callback")
 	ErrDuplicateRule     = errors.New("duplicate rule")
 	ErrNoRules           = errors.New("no rules provided")
+	ErrMissingCreId      = errors.New("missing cre id")
 )
 
 type RuntimeT struct {
@@ -85,52 +87,70 @@ func compileRuleTree(cf compiler.RuntimeI, tree *parser.TreeT) (compiler.ObjsT, 
 	return nodeObjs, nil
 }
 
-func compileRulePath(cf compiler.RuntimeI, path string) (compiler.ObjsT, *parser.RulesT, error) {
+func compileRulePath(cf compiler.RuntimeI, rp rules.RulePathT) (compiler.ObjsT, *parser.RulesT, error) {
 	var (
-		rules    *parser.RulesT
-		tree     *parser.TreeT
-		nodeObjs compiler.ObjsT
-		err      error
+		rs        *parser.RulesT
+		tree      *parser.TreeT
+		nodeObjs  compiler.ObjsT
+		rdrOpts   = make([]utils.ReaderOptT, 0)
+		parseOpts = make([]parser.ParseOptT, 0)
+		err       error
 	)
 
-	log.Info().Str("path", path).Msg("Parsing rules")
+	log.Info().Str("path", rp.Path).Msg("Parsing rules")
 
-	if rules, err = utils.ParseRulesPath(path); err != nil {
+	switch rp.Type {
+	case rules.RuleTypeCre:
+		rdrOpts = append(rdrOpts, utils.WithMultiDoc())
+	case rules.RuleTypeUser:
+		// Allow empty IDs in user generated content
+		rdrOpts = append(rdrOpts, utils.WithGenIds())
+		parseOpts = append(parseOpts, parser.WithGenIds())
+	}
+
+	if rs, err = utils.ParseRulesPath(rp.Path, rdrOpts...); err != nil {
 		log.Error().Err(err).Msg("Failed to parse rules")
 		return nil, nil, err
 	}
 
-	if tree, err = parser.ParseRules(rules); err != nil {
+	if tree, err = parser.ParseRules(rs, parseOpts); err != nil {
 		return nil, nil, err
 	}
 
-	log.Info().Int("cres", len(rules.Rules)).Msg("Parsed rules")
-	for _, rule := range rules.Rules {
+	log.Info().Int("cres", len(rs.Rules)).Msg("Parsed rules")
+	for _, rule := range rs.Rules {
 		log.Info().Str("id", rule.Metadata.Id).Str("cre", rule.Cre.Id).Msg("Rule")
 	}
 
 	nodeObjs, err = compileRuleTree(cf, tree)
 	if err != nil {
-		return nil, nil, pqerr.WithFile(err, path)
+		return nil, nil, pqerr.WithFile(err, rp.Path)
 	}
 
-	return nodeObjs, rules, nil
+	return nodeObjs, rs, nil
 }
 
 func compileRule(cf compiler.RuntimeI, data []byte) (compiler.ObjsT, *parser.RulesT, error) {
 	var (
-		rules    *parser.RulesT
-		tree     *parser.TreeT
-		nodeObjs compiler.ObjsT
-		err      error
+		rules     *parser.RulesT
+		tree      *parser.TreeT
+		nodeObjs  compiler.ObjsT
+		rdrOpts   = make([]utils.ReaderOptT, 0)
+		parseOpts = make([]parser.ParseOptT, 0)
+		err       error
 	)
 
-	if rules, err = utils.ParseRules(bytes.NewReader(data)); err != nil {
+	// Generate IDs for rules if missing
+	rdrOpts = append(rdrOpts, utils.WithGenIds())
+	parseOpts = append(parseOpts, parser.WithGenIds())
+
+	if rules, err = utils.ParseRules(bytes.NewReader(data), rdrOpts...); err != nil {
 		log.Error().Err(err).Msg("Failed to parse rules")
 		return nil, nil, err
 	}
 
-	if tree, err = parser.ParseRules(rules); err != nil {
+	if tree, err = parser.ParseRules(rules, parseOpts); err != nil {
+		log.Error().Err(err).Msg("Failed to parse rules")
 		return nil, nil, err
 	}
 
@@ -161,12 +181,14 @@ func (r *RuntimeT) compileRules(cf compiler.RuntimeI, data []byte) (compiler.Obj
 	)
 
 	if nObjs, rules, err = compileRule(cf, data); err != nil {
+		log.Error().Err(err).Msg("Failed to compile rule")
 		return nil, nil, err
 	}
 
 	r.Ux.IncrementRuleTracker(int64(len(rules.Rules)))
 
 	if ok, err = validateRules(rules, nil); !ok {
+		log.Error().Err(err).Msg("Failed to validate rules")
 		return nil, nil, err
 	}
 
@@ -174,7 +196,7 @@ func (r *RuntimeT) compileRules(cf compiler.RuntimeI, data []byte) (compiler.Obj
 
 }
 
-func (r *RuntimeT) compileRulesPaths(cf compiler.RuntimeI, paths []string) (compiler.ObjsT, []*parser.RulesT, error) {
+func (r *RuntimeT) compileRulesPaths(cf compiler.RuntimeI, paths []rules.RulePathT) (compiler.ObjsT, []*parser.RulesT, error) {
 	var (
 		nodeObjs = make(compiler.ObjsT, 0)
 		allRules = make([]*parser.RulesT, 0)
@@ -466,7 +488,7 @@ func (r *RuntimeT) getRuntimeCb(report *ux.ReportT) *runtimeT {
 	return runtime
 }
 
-func (r *RuntimeT) CompileRulesPath(rulesPaths []string, report *ux.ReportT) (*RuleMatchersT, error) {
+func (r *RuntimeT) CompileRulesPath(rulesPaths []rules.RulePathT, report *ux.ReportT) (*RuleMatchersT, error) {
 
 	var (
 		nodeObjs compiler.ObjsT
@@ -497,27 +519,27 @@ func (r *RuntimeT) CompileRulesPath(rulesPaths []string, report *ux.ReportT) (*R
 	return matchers, nil
 }
 
-func (r *RuntimeT) LoadRulesPaths(rep *ux.ReportT, rulesPaths []string) (*RuleMatchersT, error) {
+func (r *RuntimeT) LoadRulesPaths(rep *ux.ReportT, rulesPaths []rules.RulePathT) (*RuleMatchersT, error) {
 
 	var (
 		ruleMatchers *RuleMatchersT
-		paths        = make([]string, 0, len(rulesPaths))
 		err          error
 	)
 
-	for _, path := range rulesPaths {
-		if _, err = os.Stat(path); err != nil {
-			log.Warn().Str("path", path).Msg("Failed to stat path. Continue...")
+	for _, rp := range rulesPaths {
+		if _, err = os.Stat(rp.Path); err != nil {
+			log.Warn().
+				Str("path", rp.Path).
+				Msg("Failed to stat path. Continue...")
 			continue
 		}
-		paths = append(paths, path)
 	}
 
-	if len(paths) == 0 {
+	if len(rulesPaths) == 0 {
 		return nil, ErrNoRules
 	}
 
-	if ruleMatchers, err = r.CompileRulesPath(paths, rep); err != nil {
+	if ruleMatchers, err = r.CompileRulesPath(rulesPaths, rep); err != nil {
 		return nil, err
 	}
 

@@ -13,7 +13,7 @@ import (
 func initLogger() {
 	logs.InitLogger(
 		logs.WithPretty(),
-		logs.WithLevel(""))
+		logs.WithLevel("DEBUG"))
 }
 
 func TestMain(m *testing.M) {
@@ -203,6 +203,10 @@ func TestMissExamples(t *testing.T) {
 		"Example30-miss": {
 			rulePath: "../examples/30-negate-absolute.yaml",
 			dataPath: "../examples/30-example.log",
+		},
+		"Missing-IDs": {
+			rulePath: "missing-ids.yaml",
+			dataPath: "missing-ids.log",
 		},
 	}
 

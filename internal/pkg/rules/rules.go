@@ -94,12 +94,25 @@ const (
 	maxResp = 1500 // typical MTU size
 )
 
-func GetRules(ctx context.Context, conf *config.Config, configDir, cmdLineRules, token, ruleUpdateFile, baseAddr string, tlsPort, udpPort int) ([]string, error) {
+type RuleTypeT string
+
+const (
+	RuleTypeCre  RuleTypeT = "cre"
+	RuleTypeUser RuleTypeT = "user"
+)
+
+type RulePathT struct {
+	Path string
+	Type RuleTypeT
+}
+
+func GetRules(ctx context.Context, conf *config.Config, configDir, cmdLineRules, token, ruleUpdateFile, baseAddr string, tlsPort, udpPort int) ([]RulePathT, error) {
 	var (
 		syncRulesPath string
-		rulePaths     = make([]string, 0)
+		rulePaths     = make([]RulePathT, 0)
 		err           error
 	)
+
 	// Sync rules
 	if syncRulesPath, err = syncUpdates(ctx, conf, configDir, token, ruleUpdateFile, baseAddr, tlsPort, udpPort); err != nil {
 		// Continue on error. If we cannot download any rules at all on first run, a user will have to provide them on the command line or config
@@ -107,14 +120,25 @@ func GetRules(ctx context.Context, conf *config.Config, configDir, cmdLineRules,
 	}
 
 	if syncRulesPath != "" && !conf.Rules.Disabled {
-		rulePaths = append(rulePaths, syncRulesPath)
+		rulePaths = append(rulePaths, RulePathT{
+			Path: syncRulesPath,
+			Type: RuleTypeCre,
+		})
 	}
 
 	if cmdLineRules != "" {
-		rulePaths = append(rulePaths, cmdLineRules)
+		rulePaths = append(rulePaths, RulePathT{
+			Path: cmdLineRules,
+			Type: RuleTypeUser,
+		})
 	}
 
-	rulePaths = append(rulePaths, conf.Rules.Paths...)
+	for _, path := range conf.Rules.Paths {
+		rulePaths = append(rulePaths, RulePathT{
+			Path: path,
+			Type: RuleTypeUser,
+		})
+	}
 
 	if len(rulePaths) == 0 {
 		return nil, ErrNoRules
@@ -308,7 +332,6 @@ func requestExeUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl,
 
 	log.Debug().
 		Str("path", currPath).
-		Str("dir", filepath.Dir(currPath)).
 		Msg("Current exe path")
 
 	tempDir, err := os.MkdirTemp(filepath.Dir(currPath), tmpDirPrefix)
@@ -370,7 +393,6 @@ func requestExeUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl,
 
 	log.Debug().
 		Str("path", newExePath).
-		Str("dir", filepath.Dir(newExePath)).
 		Msg("Temp updated exe path")
 
 	hb, err = downloadPackage(ctx, apiUrl, hashUrl, token, hashSize, pw, slowCheckTimeout, downloadTimeout)
@@ -385,7 +407,6 @@ func requestExeUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl,
 
 	log.Debug().
 		Str("path", newExeHashPath).
-		Str("dir", filepath.Dir(newExeHashPath)).
 		Msg("Temp updated exe hash path")
 
 	sb, err = downloadPackage(ctx, apiUrl, sigUrl, token, sigSize, pw, slowCheckTimeout, downloadTimeout)
@@ -400,7 +421,6 @@ func requestExeUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl,
 
 	log.Debug().
 		Str("path", newExeSigPath).
-		Str("dir", filepath.Dir(newExeSigPath)).
 		Msg("Temp updated exe sig path")
 
 	block, _ := pem.Decode(publicRulesKeyPEM)
@@ -504,7 +524,6 @@ func requestRuleUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl
 
 	log.Debug().
 		Str("path", newRulePath).
-		Str("dir", filepath.Dir(newRulePath)).
 		Msg("Temp updated rule path")
 
 	hb, err = downloadPackage(ctx, apiUrl, fullResp.RuleUrls.HashUrl, token, fullResp.RuleUrls.HashSize, pw, slowCheckTimeout, downloadTimeout)
@@ -519,7 +538,6 @@ func requestRuleUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl
 
 	log.Debug().
 		Str("path", newRuleHashPath).
-		Str("dir", filepath.Dir(newRuleHashPath)).
 		Msg("Temp updated rule hash path")
 
 	sb, err = downloadPackage(ctx, apiUrl, fullResp.RuleUrls.SigUrl, token, fullResp.RuleUrls.SigSize, pw, slowCheckTimeout, downloadTimeout)
@@ -534,7 +552,6 @@ func requestRuleUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl
 
 	log.Debug().
 		Str("path", newRuleSigPath).
-		Str("dir", filepath.Dir(newRuleSigPath)).
 		Msg("Temp updated rule sig path")
 
 	block, _ := pem.Decode(publicRulesKeyPEM)

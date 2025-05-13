@@ -75,7 +75,7 @@ func InitAndExecute(ctx context.Context) error {
 	var (
 		c          *config.Config
 		token      string
-		rulesPaths []string
+		rulesPaths []rules.RulePathT
 		err        error
 	)
 
@@ -177,7 +177,7 @@ func InitAndExecute(ctx context.Context) error {
 	}
 
 	if Options.Cron {
-		if err := ux.PrintCronJobTemplate(Options.Name, defaultConfigDir, rulesPaths[0]); err != nil {
+		if err := ux.PrintCronJobTemplate(Options.Name, defaultConfigDir, rulesPaths[0].Path); err != nil {
 			log.Error().Err(err).Msg("Failed to write cronjob template")
 			ux.ConfigError(err)
 			return err

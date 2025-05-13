@@ -1,0 +1,15 @@
+rules:
+  - cre:
+      id: CRE-2025-2222
+      severity: 2
+      title: job failure example
+    metadata:
+      gen: 1
+    rule:
+      set:
+        window: 62s
+        event:
+          source: cre.log.app
+        match:
+          - value: "Saw completed job"
+            count: 2
