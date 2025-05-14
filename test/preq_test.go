@@ -13,7 +13,7 @@ import (
 func initLogger() {
 	logs.InitLogger(
 		logs.WithPretty(),
-		logs.WithLevel("DEBUG"))
+		logs.WithLevel(""))
 }
 
 func TestMain(m *testing.M) {
