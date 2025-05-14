@@ -94,22 +94,10 @@ const (
 	maxResp = 1500 // typical MTU size
 )
 
-type RuleTypeT string
-
-const (
-	RuleTypeCre  RuleTypeT = "cre"
-	RuleTypeUser RuleTypeT = "user"
-)
-
-type RulePathT struct {
-	Path string
-	Type RuleTypeT
-}
-
-func GetRules(ctx context.Context, conf *config.Config, configDir, cmdLineRules, token, ruleUpdateFile, baseAddr string, tlsPort, udpPort int) ([]RulePathT, error) {
+func GetRules(ctx context.Context, conf *config.Config, configDir, cmdLineRules, token, ruleUpdateFile, baseAddr string, tlsPort, udpPort int) ([]utils.RulePathT, error) {
 	var (
 		syncRulesPath string
-		rulePaths     = make([]RulePathT, 0)
+		rulePaths     = make([]utils.RulePathT, 0)
 		err           error
 	)
 
@@ -120,23 +108,23 @@ func GetRules(ctx context.Context, conf *config.Config, configDir, cmdLineRules,
 	}
 
 	if syncRulesPath != "" && !conf.Rules.Disabled {
-		rulePaths = append(rulePaths, RulePathT{
+		rulePaths = append(rulePaths, utils.RulePathT{
 			Path: syncRulesPath,
-			Type: RuleTypeCre,
+			Type: utils.RuleTypeCre,
 		})
 	}
 
 	if cmdLineRules != "" {
-		rulePaths = append(rulePaths, RulePathT{
+		rulePaths = append(rulePaths, utils.RulePathT{
 			Path: cmdLineRules,
-			Type: RuleTypeUser,
+			Type: utils.RuleTypeUser,
 		})
 	}
 
 	for _, path := range conf.Rules.Paths {
-		rulePaths = append(rulePaths, RulePathT{
+		rulePaths = append(rulePaths, utils.RulePathT{
 			Path: path,
-			Type: RuleTypeUser,
+			Type: utils.RuleTypeUser,
 		})
 	}
 

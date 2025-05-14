@@ -31,6 +31,18 @@ var (
 	sectionRules = "rules"
 )
 
+type RuleTypeT string
+
+const (
+	RuleTypeCre  RuleTypeT = "cre"
+	RuleTypeUser RuleTypeT = "user"
+)
+
+type RulePathT struct {
+	Path string
+	Type RuleTypeT
+}
+
 func GetStopTime() (ts int64) {
 	return math.MaxInt64
 }

@@ -14,7 +14,6 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/prequel-dev/preq/internal/pkg/matchz"
 	"github.com/prequel-dev/preq/internal/pkg/resolve"
-	"github.com/prequel-dev/preq/internal/pkg/rules"
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/prequel-compiler/pkg/compiler"
@@ -87,7 +86,7 @@ func compileRuleTree(cf compiler.RuntimeI, tree *parser.TreeT) (compiler.ObjsT, 
 	return nodeObjs, nil
 }
 
-func compileRulePath(cf compiler.RuntimeI, rp rules.RulePathT) (compiler.ObjsT, *parser.RulesT, error) {
+func compileRulePath(cf compiler.RuntimeI, rp utils.RulePathT) (compiler.ObjsT, *parser.RulesT, error) {
 	var (
 		rs        *parser.RulesT
 		tree      *parser.TreeT
@@ -100,9 +99,9 @@ func compileRulePath(cf compiler.RuntimeI, rp rules.RulePathT) (compiler.ObjsT, 
 	log.Info().Str("path", rp.Path).Msg("Parsing rules")
 
 	switch rp.Type {
-	case rules.RuleTypeCre:
+	case utils.RuleTypeCre:
 		rdrOpts = append(rdrOpts, utils.WithMultiDoc())
-	case rules.RuleTypeUser:
+	case utils.RuleTypeUser:
 		// Allow empty IDs in user generated content
 		rdrOpts = append(rdrOpts, utils.WithGenIds())
 		parseOpts = append(parseOpts, parser.WithGenIds())
@@ -196,7 +195,7 @@ func (r *RuntimeT) compileRules(cf compiler.RuntimeI, data []byte) (compiler.Obj
 
 }
 
-func (r *RuntimeT) compileRulesPaths(cf compiler.RuntimeI, paths []rules.RulePathT) (compiler.ObjsT, []*parser.RulesT, error) {
+func (r *RuntimeT) compileRulesPaths(cf compiler.RuntimeI, paths []utils.RulePathT) (compiler.ObjsT, []*parser.RulesT, error) {
 	var (
 		nodeObjs = make(compiler.ObjsT, 0)
 		allRules = make([]*parser.RulesT, 0)
@@ -488,7 +487,7 @@ func (r *RuntimeT) getRuntimeCb(report *ux.ReportT) *runtimeT {
 	return runtime
 }
 
-func (r *RuntimeT) CompileRulesPath(rulesPaths []rules.RulePathT, report *ux.ReportT) (*RuleMatchersT, error) {
+func (r *RuntimeT) CompileRulesPath(rulesPaths []utils.RulePathT, report *ux.ReportT) (*RuleMatchersT, error) {
 
 	var (
 		nodeObjs compiler.ObjsT
@@ -519,7 +518,7 @@ func (r *RuntimeT) CompileRulesPath(rulesPaths []rules.RulePathT, report *ux.Rep
 	return matchers, nil
 }
 
-func (r *RuntimeT) LoadRulesPaths(rep *ux.ReportT, rulesPaths []rules.RulePathT) (*RuleMatchersT, error) {
+func (r *RuntimeT) LoadRulesPaths(rep *ux.ReportT, rulesPaths []utils.RulePathT) (*RuleMatchersT, error) {
 
 	var (
 		ruleMatchers *RuleMatchersT

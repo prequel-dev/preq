@@ -76,7 +76,7 @@ func InitAndExecute(ctx context.Context) error {
 	var (
 		c          *config.Config
 		token      string
-		rulesPaths []rules.RulePathT
+		rulesPaths []utils.RulePathT
 		err        error
 	)
 
