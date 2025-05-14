@@ -28,13 +28,13 @@ import (
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/preq/internal/pkg/verz"
+	"github.com/prequel-dev/preq/pkg/prefix"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
 const (
 	udpBaseAddr              = "api-beta.prequel.dev"
-	prequelRulesPrefix       = "prequel-public-cre-rules"
 	prequelRulesSuffix       = ".gz"
 	prequelRulesSha256Suffix = ".sha2"
 	prequelRulesSigSuffix    = ".sig"
@@ -44,7 +44,7 @@ const (
 
 const (
 	retries          = uint(1)
-	rulesFilenameFmt = prequelRulesPrefix + "%s" + prequelRulesSuffix
+	rulesFilenameFmt = prefix.PrequelPublicRulesPrefix + "%s" + prequelRulesSuffix
 	fastCheckTimeout = 100 * time.Millisecond
 	slowCheckTimeout = 300 * time.Millisecond
 	downloadTimeout  = 30 * time.Second
