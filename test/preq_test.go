@@ -116,6 +116,10 @@ func TestSuccessExamples(t *testing.T) {
 			rulePath: "../examples/29-negate-slide-anchor-1-window.yaml",
 			dataPath: "../examples/29-example-fp-moved.log",
 		},
+		"Missing-IDs": {
+			rulePath: "missing-ids.yaml",
+			dataPath: "missing-ids.log",
+		},
 	}
 
 	ctx := context.Background()
@@ -203,10 +207,6 @@ func TestMissExamples(t *testing.T) {
 		"Example30-miss": {
 			rulePath: "../examples/30-negate-absolute.yaml",
 			dataPath: "../examples/30-example.log",
-		},
-		"Missing-IDs": {
-			rulePath: "missing-ids.yaml",
-			dataPath: "missing-ids.log",
 		},
 	}
 

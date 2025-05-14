@@ -1,10 +1,15 @@
-2019/02/05 12:07:37 [notice] 1629#1629: signal process started
-2019/02/05 12:07:37 [error] 1629#1629: open() "/run/nginx.pid" failed (2: No such file or directory)
-2019/02/05 12:07:38 [emerg] 1655#1655: bind() to 0.0.0.0:80 failed (98: Address already in use)
-2019/02/05 12:07:38 [emerg] 1655#1655: bind() to foo bar
-2019/02/05 12:07:38 [emerg] 1655#1655: bind() to test
-2019/02/05 12:07:38 [emerg] 1655#1655: bind() to 0.0.0.0:444 failed (98: Address already in use)
-2019/02/05 12:07:38 [emerg] 1655#1655: bind() just kidding false alarm this is normal
-2019/02/05 12:07:38 [emerg] 1655#1655: bind() to [::]:444 failed (98: Address already in use)
-2019/02/05 12:07:38 [emerg] 1655#1655: still could not bind() to baaaz
-2019/02/05 12:07:41 [alert] 1631#1631: unlink() "/run/nginx.pid" failed (2: No such file or directory)
+2025-03-11 14:00:19.421865+00:00 [erro] <0.229.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.449530684.1179910147.46753>}} from <0.229.0> to <0.3159.0> in an old incarnation (1741605434) of this node (1741701615) <A>
+2025-03-11 14:00:19.421872+00:00 [erro] <0.229.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.449530684.1179910147.46753>}} from <0.229.0> to <0.3156.0> in an old incarnation (1741605434) of this node (1741701615)
+2025-03-11 14:00:19.718868+00:00 [info] <0.519.0> Started message store of type persistent for vhost '/'
+2025-03-11 14:00:20.144956+00:00 [warn] <0.247.0> Mnesia('rabbit@rabbitmq-0.svc.cluster.local'): ** WARNING ** Mnesia is overloaded: {dump_log,write_threshold}
+2025-03-11 14:00:20.177194+00:00 [warn] <0.247.0> Mnesia('rabbit@rabbitmq-0.svc.cluster.local'): ** WARNING ** Mnesia is overloaded: {dump_log,write_threshold}
+2025-03-11 14:00:20.217811+00:00 [warn] <0.247.0> Mnesia('rabbit@rabbitmq-0.svc.cluster.local'): ** WARNING ** Mnesia is overloaded: {dump_log,write_threshold}
+2025-03-11 14:00:20.245309+00:00 [warn] <0.247.0> Mnesia('rabbit@rabbitmq-0.svc.cluster.local'): ** WARNING ** Mnesia is overloaded: {dump_log,write_threshold}
+2025-03-11 14:00:20.269326+00:00 [warn] <0.247.0> Mnesia('rabbit@rabbitmq-0.svc.cluster.local'): ** WARNING ** Mnesia is overloaded: {dump_log,write_threshold}
+2025-03-11 14:00:20.295177+00:00 [warn] <0.247.0> Mnesia('rabbit@rabbitmq-0.svc.cluster.local'): ** WARNING ** Mnesia is overloaded: {dump_log,write_threshold}
+2025-03-11 14:00:20.318874+00:00 [warn] <0.247.0> Mnesia('rabbit@rabbitmq-0.svc.cluster.local'): ** WARNING ** Mnesia is overloaded: {dump_log,write_threshold}
+2025-03-11 14:00:20.341291+00:00 [warn] <0.247.0> Mnesia('rabbit@rabbitmq-0.svc.cluster.local'): ** WARNING ** Mnesia is overloaded: {dump_log,write_threshold}
+2025-03-11 14:00:21.337821+00:00 [info] <0.519.0> Recovering 4540 queues of type rabbit_classic_queue took 1851ms
+2025-03-11 14:00:21.337940+00:00 [info] <0.519.0> Recovering 0 queues of type rabbit_quorum_queue took 0ms
+2025-03-11 14:00:21.338046+00:00 [info] <0.519.0> Recovering 0 queues of type rabbit_stream_queue took 0ms
+2025-03-11 14:00:21.505654+00:00 [info] <0.229.0> Running boot step empty_db_check defined by app rabbit

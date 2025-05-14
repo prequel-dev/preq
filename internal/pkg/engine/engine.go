@@ -158,6 +158,16 @@ func compileRule(cf compiler.RuntimeI, data []byte) (compiler.ObjsT, *parser.Rul
 		log.Info().Str("id", rule.Metadata.Id).Str("cre", rule.Cre.Id).Msg("Rule")
 	}
 
+	for i := range rules.Rules {
+		var r = &rules.Rules[i]
+		if r.Metadata.Id == "" {
+			r.Metadata.Id = tree.Nodes[i].Metadata.RuleId
+		}
+		if r.Metadata.Hash == "" {
+			r.Metadata.Hash = tree.Nodes[i].Metadata.RuleHash
+		}
+	}
+
 	nodeObjs, err = compileRuleTree(cf, tree)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to compile rule tree")
@@ -292,6 +302,13 @@ func (r *RuntimeT) AddRules(rules *parser.RulesT) error {
 
 	var ok bool
 	for _, rule := range rules.Rules {
+
+		log.Info().
+			Str("id", rule.Metadata.Id).
+			Str("hash", rule.Metadata.Hash).
+			Str("cre", rule.Cre.Id).
+			Msg("Adding rule")
+
 		if _, ok = r.Rules[rule.Metadata.Hash]; !ok {
 			r.Rules[rule.Metadata.Hash] = rule.Cre
 		} else {

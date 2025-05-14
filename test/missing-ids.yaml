@@ -1,15 +1,38 @@
 rules:
   - cre:
-      id: CRE-2025-2222
-      severity: 2
-      title: job failure example
+      id: CRE-2024-7777
+      severity: 0
+      title: RabbitMQ Mnesia overloaded recovering persistent queues
+      category: message-queue-problems
+      author: Prequel
+      description: |
+        - The RabbitMQ cluster is processing a large number of persistent mirrored queues at boot.
+      cause: |
+        - The Erlang process, Mnesia, is overloaded while recovering persistent queues on boot.
+      impact: |
+        - RabbitMQ is unable to process any new messages and can cause outages in consumers and producers.
+      tags:
+        - known-problem
+        - rabbitmq
+      mitigation: |
+        - Adjusting mirroring policies to limit the number of mirrored queues
+        - Remove high-availability policies from queues
+        - Add additional CPU resources and restart the RabbitMQ cluster
+        - Use [lazy queues](https://www.rabbitmq.com/docs/lazy-queues) to avoid incurring the costs of writing data to disk
+      references:
+        - https://groups.google.com/g/rabbitmq-users/c/ekV9tTBRZms/m/1EXw-ruuBQAJ
+      applications:
+        - name: "rabbitmq"
+          version: "3.9.x"
     metadata:
       gen: 1
     rule:
-      set:
-        window: 62s
+      sequence:
+        window: 30s
         event:
-          source: cre.log.app
-        match:
-          - value: "Saw completed job"
-            count: 2
+          source: rabbitmq
+        order:
+          - regex: "Discarding message(.+)in an old incarnation(.+)of this node"
+          - "Mnesia is overloaded"
+        negate:
+          - "SIGTERM received - shutting down"
