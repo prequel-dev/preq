@@ -30,7 +30,7 @@ require (
 require (
 	github.com/cqroot/prompt v0.9.4
 	github.com/fatih/color v1.18.0
-	github.com/prequel-dev/prequel-compiler v0.0.11
+	github.com/prequel-dev/prequel-compiler v0.0.14
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.20.1
 	gopkg.in/yaml.v2 v2.4.0
