@@ -1,0 +1,14 @@
+rules:
+  - cre:
+      id: count-example
+    metadata:
+      id: ZRFiu1mDd8eCruq2ZUH9hx
+      hash: TzUzLggVQLvReC1mivmkrK
+    rule:
+      set:
+        event:
+          source: cre.log.kafka
+        match:
+          - regex: "foo(.+)bar"
+            count: 2
+        window: 10s
