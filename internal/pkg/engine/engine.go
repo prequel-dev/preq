@@ -20,7 +20,6 @@ import (
 	"github.com/prequel-dev/prequel-compiler/pkg/compiler"
 	"github.com/prequel-dev/prequel-compiler/pkg/datasrc"
 	"github.com/prequel-dev/prequel-compiler/pkg/parser"
-	"github.com/prequel-dev/prequel-compiler/pkg/pqerr"
 	"github.com/prequel-dev/prequel-compiler/pkg/schema"
 	"github.com/prequel-dev/prequel-logmatch/pkg/entry"
 	lm "github.com/prequel-dev/prequel-logmatch/pkg/match"
@@ -93,8 +92,6 @@ func compileRuleTree(cf compiler.RuntimeI, tree *parser.TreeT) (compiler.ObjsT, 
 func compileRulePath(cf compiler.RuntimeI, rp utils.RulePathT) (compiler.ObjsT, *parser.RulesT, error) {
 	var (
 		rs        *parser.RulesT
-		tree      *parser.TreeT
-		nodeObjs  compiler.ObjsT
 		rdrOpts   = make([]utils.ReaderOptT, 0)
 		parseOpts = make([]parser.ParseOptT, 0)
 		err       error
@@ -116,39 +113,12 @@ func compileRulePath(cf compiler.RuntimeI, rp utils.RulePathT) (compiler.ObjsT, 
 		return nil, nil, err
 	}
 
-	if tree, err = parser.ParseRules(rs, parseOpts); err != nil {
-		return nil, nil, err
-	}
-
-	log.Info().Int("cres", len(rs.Rules)).Msg("Parsed rules")
-	for _, rule := range rs.Rules {
-		log.Info().Str("id", rule.Metadata.Id).Str("cre", rule.Cre.Id).Msg("Rule")
-	}
-
-	// Add missing IDs
-	for i := range rs.Rules {
-		var r = &rs.Rules[i]
-		if r.Metadata.Id == "" {
-			r.Metadata.Id = tree.Nodes[i].Metadata.RuleId
-		}
-		if r.Metadata.Hash == "" {
-			r.Metadata.Hash = tree.Nodes[i].Metadata.RuleHash
-		}
-	}
-
-	nodeObjs, err = compileRuleTree(cf, tree)
-	if err != nil {
-		return nil, nil, pqerr.WithFile(err, rp.Path)
-	}
-
-	return nodeObjs, rs, nil
+	return doCompileRule(cf, rs, parseOpts)
 }
 
 func compileRule(cf compiler.RuntimeI, data []byte) (compiler.ObjsT, *parser.RulesT, error) {
 	var (
 		rules     *parser.RulesT
-		tree      *parser.TreeT
-		nodeObjs  compiler.ObjsT
 		rdrOpts   = make([]utils.ReaderOptT, 0)
 		parseOpts = make([]parser.ParseOptT, 0)
 		err       error
@@ -162,6 +132,17 @@ func compileRule(cf compiler.RuntimeI, data []byte) (compiler.ObjsT, *parser.Rul
 		log.Error().Err(err).Msg("Failed to parse rules")
 		return nil, nil, err
 	}
+
+	return doCompileRule(cf, rules, parseOpts)
+}
+
+func doCompileRule(cf compiler.RuntimeI, rules *parser.RulesT, parseOpts []parser.ParseOptT) (compiler.ObjsT, *parser.RulesT, error) {
+
+	var (
+		tree     *parser.TreeT
+		nodeObjs compiler.ObjsT
+		err      error
+	)
 
 	if tree, err = parser.ParseRules(rules, parseOpts); err != nil {
 		log.Error().Err(err).Msg("Failed to parse rules")
