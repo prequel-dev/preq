@@ -125,6 +125,17 @@ func compileRulePath(cf compiler.RuntimeI, rp utils.RulePathT) (compiler.ObjsT, 
 		log.Info().Str("id", rule.Metadata.Id).Str("cre", rule.Cre.Id).Msg("Rule")
 	}
 
+	// Add missing IDs
+	for i := range rs.Rules {
+		var r = &rs.Rules[i]
+		if r.Metadata.Id == "" {
+			r.Metadata.Id = tree.Nodes[i].Metadata.RuleId
+		}
+		if r.Metadata.Hash == "" {
+			r.Metadata.Hash = tree.Nodes[i].Metadata.RuleHash
+		}
+	}
+
 	nodeObjs, err = compileRuleTree(cf, tree)
 	if err != nil {
 		return nil, nil, pqerr.WithFile(err, rp.Path)
@@ -162,6 +173,7 @@ func compileRule(cf compiler.RuntimeI, data []byte) (compiler.ObjsT, *parser.Rul
 		log.Info().Str("id", rule.Metadata.Id).Str("cre", rule.Cre.Id).Msg("Rule")
 	}
 
+	// Add missing IDs
 	for i := range rules.Rules {
 		var r = &rules.Rules[i]
 		if r.Metadata.Id == "" {
