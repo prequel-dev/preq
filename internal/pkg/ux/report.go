@@ -30,10 +30,12 @@ const (
 	sevHigh       = "high"
 	sevMedium     = "medium"
 	sevLow        = "low"
+	sevInfo       = "info"
 	colorCritical = text.FgHiRed
 	colorHigh     = text.FgHiYellow
 	colorMedium   = text.FgHiMagenta
 	colorLow      = text.FgHiGreen
+	colorInfo     = text.FgHiBlue
 	reportFmt     = "preq-report-%d.json"
 )
 
@@ -42,7 +44,7 @@ const (
 )
 
 var (
-	sevWidth = max(len(sevCritical), len(sevHigh), len(sevMedium), len(sevLow))
+	sevWidth = max(len(sevCritical), len(sevHigh), len(sevMedium), len(sevLow), len(sevInfo))
 	retries  = uint(3)
 	delay    = time.Second * 5
 )
@@ -142,6 +144,11 @@ func getSeverity(severity uint) (*severityT, error) {
 		return &severityT{
 			severity: sevLow,
 			color:    colorLow,
+		}, nil
+	case parser.SeverityInfo:
+		return &severityT{
+			severity: sevInfo,
+			color:    colorInfo,
 		}, nil
 	}
 

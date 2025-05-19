@@ -79,6 +79,7 @@ func NewLogFactory(data []byte, opts ...OptT) (format.FactoryI, int64, error) {
 	}
 
 	if err != nil {
+		log.Error().Err(err).Msg("Failed to detect timestamp format")
 		return nil, 0, err
 	}
 

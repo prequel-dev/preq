@@ -112,12 +112,12 @@ func TryTimestampFormat(exp string, fmtStr TimestampFmt, buf []byte, maxTries in
 		Msg("Trying timestamp format")
 
 	if cb, err = GetTimestampFormat(fmtStr); err != nil {
-		log.Error().Err(err).Msg("Failed to get timestamp format")
+		log.Warn().Err(err).Msg("Failed to get timestamp format")
 		return nil, 0, err
 	}
 
 	if factory, err = format.NewRegexFactory(exp, cb); err != nil {
-		log.Error().Err(err).Msg("Failed to create regex factory")
+		log.Warn().Err(err).Msg("Failed to create regex factory")
 		return nil, 0, err
 	}
 
@@ -137,7 +137,7 @@ func TryTimestampFormat(exp string, fmtStr TimestampFmt, buf []byte, maxTries in
 	}
 
 	if err != nil {
-		log.Info().Err(err).Msg("Failed to read timestamp")
+		log.Warn().Err(err).Msg("Failed to read timestamp")
 		return nil, 0, err
 	}
 
