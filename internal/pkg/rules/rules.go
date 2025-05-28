@@ -46,7 +46,7 @@ const (
 	retries          = uint(1)
 	rulesFilenameFmt = prefix.PrequelPublicRulesPrefix + "%s" + prequelRulesSuffix
 	fastCheckTimeout = 150 * time.Millisecond
-	slowCheckTimeout = 500 * time.Millisecond
+	slowCheckTimeout = 300 * time.Millisecond
 	noRulesTimeout   = 5 * time.Second
 	downloadTimeout  = 30 * time.Second
 )
