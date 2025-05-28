@@ -45,8 +45,9 @@ const (
 const (
 	retries          = uint(1)
 	rulesFilenameFmt = prefix.PrequelPublicRulesPrefix + "%s" + prequelRulesSuffix
-	fastCheckTimeout = 100 * time.Millisecond
-	slowCheckTimeout = 300 * time.Millisecond
+	fastCheckTimeout = 150 * time.Millisecond
+	slowCheckTimeout = 500 * time.Millisecond
+	noRulesTimeout   = 5 * time.Second
 	downloadTimeout  = 30 * time.Second
 )
 
@@ -145,6 +146,7 @@ func syncUpdates(ctx context.Context, conf *config.Config, configDir, token, upd
 		currRulesPath    string
 		apiUrl           = fmt.Sprintf("https://%s:%d", baseAddr, tlsPort)
 		dur              = defaultLocalCheckDur
+		timeout          = slowCheckTimeout
 		err              error
 	)
 
@@ -164,6 +166,15 @@ func syncUpdates(ctx context.Context, conf *config.Config, configDir, token, upd
 		return currRulesPath, err
 	}
 
+	// If we don't have any rules installed, then bump the timeout and force a full checkin
+	if currRulesPath == "" {
+		timeout = noRulesTimeout
+		localCheckUpdate = true
+		log.Warn().
+			Str("timeout", timeout.String()).
+			Msg("No rules installed yet. Increasing timeout and forcing a full checkin")
+	}
+
 	// If we don't need to do a full check in, do a fast one (~30ms)
 	if !localCheckUpdate {
 		if tinyResp, err = fastUpdateSync(ctx, fmt.Sprintf("%s:%d", udpBaseAddr, udpPort), fastCheckTimeout); err != nil {
@@ -171,7 +182,7 @@ func syncUpdates(ctx context.Context, conf *config.Config, configDir, token, upd
 		}
 	} else {
 		// Otherwise, do a full check in (~130ms). Uses slowCheckTimeout
-		if fullResp, err = checkin(ctx, apiUrl, token, currRulesVer, slowCheckTimeout); err != nil {
+		if fullResp, err = checkin(ctx, apiUrl, token, currRulesVer, timeout); err != nil {
 			return currRulesPath, err
 		}
 	}
@@ -181,7 +192,7 @@ func syncUpdates(ctx context.Context, conf *config.Config, configDir, token, upd
 		// Ok, we need to do one or more updates. But we don't know if we have a full response.
 		if fullResp == nil {
 			// Otherwise, do a full check in (~130ms). Uses slowCheckTimeout
-			if fullResp, err = checkin(ctx, apiUrl, token, currRulesVer, slowCheckTimeout); err != nil {
+			if fullResp, err = checkin(ctx, apiUrl, token, currRulesVer, timeout); err != nil {
 				return currRulesPath, err
 			}
 		}

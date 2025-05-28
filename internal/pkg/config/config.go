@@ -164,6 +164,12 @@ var (
   - format: epochany
     pattern: |
       /Date\((\d+)\)
+
+  # Example: time="2025-02-12T18:12:58.715528Z"
+  # Source: argocd
+  - format: rfc3339
+    pattern: |
+      time="([^"]+)"
 `
 
 	windowConfig = `window: %s`
