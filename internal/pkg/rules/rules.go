@@ -39,7 +39,7 @@ const (
 	prequelRulesSha256Suffix = ".sha2"
 	prequelRulesSigSuffix    = ".sig"
 	tmpDirPrefix             = "preq-update"
-	defaultLocalCheckDur     = 24 * time.Hour * 2 // 2 days
+	defaultLocalCheckDur     = 24 * time.Hour * 1 // 1 day
 )
 
 const (
