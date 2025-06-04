@@ -3,6 +3,7 @@ package ux
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/rs/zerolog/log"
 )
@@ -11,10 +12,8 @@ var (
 	JobTemplate = `# ---------------------------------------------------------------------------
 # preq cronjob template
 # 
-# PRE-RUN Create/refresh the ConfigMap that the CronJob expects:
+# Step 1. Create/refresh the ConfigMap that the CronJob expects:
 #
-# Option 1: Use default latest rules with a Slack notification webhook
-# 
 #   kubectl create configmap preq-conf \
 #     --from-file=config.yaml=%s/config.yaml \
 #     --from-file=.ruletoken=%s/.ruletoken \
@@ -22,40 +21,18 @@ var (
 #     --dry-run=client -o yaml | kubectl apply -f -
 #
 # The --dry-run/apply pattern lets you update the ConfigMap idempotently.
-# 
-# These configuration files are automatically created by preq the first time it is executed locally by the kubectl client. 
-# 
-# NOTE: This template assumes the config.yaml file is configured to use a Slack notification webhook. Visit 
-# https://docs.prequel.dev/configuration to learn how to modify the configuration file to add a notification webhook (e.g. Slack).
 #
-# notification:
-#   type: slack
-#   webhook: https://hooks.slack.com/services/.....
+# Step 2. Install the job
 #
-# Option 2: Use custom rules with a Slack notification webhook
-#
-# To add custom rules to this job, update the config.yaml file to add the path to your custom rules file where it will be mounted 
-# in the cronjob filesystem.
-#
-# rules:
-#   paths:
-#     - /.preq/custom-rules.yaml
-#
-# Then create the configmap with the following command:
-#
-#   kubectl create configmap preq-conf \
-#     --from-file=config.yaml=%s/config.yaml \
-#     --from-file=.ruletoken=%s/.ruletoken \
-#     --from-file=%s=%s/%s \
-#     --from-file=custom-rules.yaml=/local/path/to/custom-rules.yaml \
-#     --dry-run=client -o yaml | kubectl apply -f -
+#   kubectl apply -f cronjob.yaml
 #
 # IMPORTANT:
 # 
-# 1. Uncomment the command in the job below to add a POD to monitor. Use labels to select the POD for a service.
+# 1. Uncomment the command in the job below to add a deployment, pod, job, or service to monitor. Use labels to select the POD for a service.
 # 2. Update the schedule to run at the frequency you want. This runs every 10 minutes by default.
-# 3. Change the -o "preq-cronjob-<POD>: " output prefix to the name of the cronjob or how you want to identify these notifications in Slack.
+# 3. Change the actions.yaml to run an executable or create a JIRA ticket instead of sending a Slack notification.
 #
+# Visit https://docs.prequel.dev for more information.
 # ---------------------------------------------------------------------------
 apiVersion: v1
 kind: ServiceAccount
@@ -68,7 +45,7 @@ metadata:
   name: preq
 rules:
   - apiGroups: ['']
-    resources: ['pods', 'pods/log']
+    resources: ['services', 'jobs', 'depoyments', 'pods', 'pods/log']
     verbs: ['get', 'list', 'watch']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -109,27 +86,49 @@ spec:
                   #
                   # * If you want to monitor a pod using labels to select the POD for a service, use the following commands:
                   # POD=$(kubectl -n default get pods -l app.kubernetes.io/instance=<LABEL> -o jsonpath='{.items[0].metadata.name}')
-                  # kubectl preq "$POD" -y -o "preq-cronjob-<POD>: "
+                  # kubectl preq "$POD" -y
                   #
                   # * If you want to monitor pods in a deployment, use the following command:
-                  # kubectl preq deployment/<DEPLOYMENT> -y -o "preq-cronjob-<DEPLOYMENT>: "
+                  # kubectl preq deployment/<DEPLOYMENT> -y
                   #
                   # * If you want to monitor pods in a job, use the following command:
-                  # kubectl preq job/<JOB> -y -o "preq-cronjob-<JOB>: "
+                  # kubectl preq job/<JOB> -y
                   #
                   # * If you want to monitor pods in a service, use the following command:
-                  # kubectl preq service/<SERVICE> -y -o "preq-cronjob-<SERVICE>: "
+                  # kubectl preq service/<SERVICE> -y 
 				  
               volumeMounts:
                 - name: preq-conf
-                  mountPath: /.preq
+                  mountPath: /.config/preq
+                  readOnly: true
+                - name: actions-config
+                  mountPath: /.config/preq/actions.yaml
                   readOnly: true
           restartPolicy: Never
           volumes:
             - name: preq-conf
               configMap:
                 name: preq-conf
+            - name: actions-config
+              configMap:
+                name: actions-config
           serviceAccountName: preq
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: actions-config
+data:
+  actions.yaml: |-
+    actions:
+      - type: slack
+        regex: "CRE*"
+        slack:
+          webhook_url: <SLACK_WEBHOOK_URL>
+          message_template: |
+            *preq detection*: [{{ field .cre "Id" }}] {{ field .cre "Title" }}
+
+            {{ (index .hits 0).Timestamp }}: {{ (index .hits 0).Entry }}
 `
 	ConfigMapStdoutTemplate = `
 kubectl create configmap preq-conf \
@@ -139,16 +138,19 @@ kubectl create configmap preq-conf \
 `
 )
 
-func PrintCronJobTemplate(output, configDir, rulesFile string) error {
+func PrintCronJobTemplate(output, configDir, rulesPath string) error {
+
+	rulesFile := filepath.Base(rulesPath)
+
 	if output == OutputStdout {
-		fmt.Fprintf(os.Stdout, JobTemplate, configDir, configDir, rulesFile, configDir, rulesFile, configDir, configDir, rulesFile, configDir, rulesFile)
+		fmt.Fprintf(os.Stdout, JobTemplate, configDir, configDir, rulesFile, configDir, rulesFile)
 	} else {
 
 		if output == "" {
 			output = "cronjob.yaml"
 		}
 
-		job := fmt.Sprintf(JobTemplate, configDir, configDir, rulesFile, configDir, rulesFile, configDir, configDir, rulesFile, configDir, rulesFile)
+		job := fmt.Sprintf(JobTemplate, configDir, configDir, rulesFile, configDir, rulesFile)
 		err := os.WriteFile(output, []byte(job), 0644)
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to write cronjob template")
