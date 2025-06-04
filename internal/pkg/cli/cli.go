@@ -281,28 +281,6 @@ LOOP:
 			return err
 		}
 
-	case c.Notification.Type == ux.NotificationSlack:
-
-		log.Debug().Msgf("Posting Slack notification to %s", c.Notification.Webhook)
-
-		if err = report.PostSlackDetection(ctx, c.Notification.Webhook, Options.Name); err != nil {
-			log.Error().Err(err).Msg("Failed to post Slack notification")
-			ux.RulesError(err)
-			return err
-		}
-
-		if !Options.Quiet {
-
-			// Print reports to stdout when notifications are enabled
-			if err = report.PrintReport(); err != nil {
-				log.Error().Err(err).Msg("Failed to print report")
-				ux.RulesError(err)
-				return err
-			}
-
-			fmt.Fprintf(os.Stdout, "\nSent Slack notification\n")
-		}
-
 	case Options.Name == ux.OutputStdout:
 		if err = report.PrintReport(); err != nil {
 			log.Error().Err(err).Msg("Failed to print report")

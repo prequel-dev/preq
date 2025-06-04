@@ -175,21 +175,15 @@ var (
 	windowConfig = `window: %s`
 )
 
-type NotificationWebhook struct {
-	Type    string `yaml:"type"`
-	Webhook string `yaml:"webhook"`
-}
-
 type Config struct {
-	TimestampRegexes []Regex             `yaml:"timestamps"`
-	Rules            Rules               `yaml:"rules"`
-	UpdateFrequency  *time.Duration      `yaml:"updateFrequency"`
-	RulesVersion     string              `yaml:"rulesVersion"`
-	AcceptUpdates    bool                `yaml:"acceptUpdates"`
-	DataSources      string              `yaml:"dataSources"`
-	Notification     NotificationWebhook `yaml:"notification"`
-	Window           time.Duration       `yaml:"window"`
-	Skip             int                 `yaml:"skip"`
+	TimestampRegexes []Regex        `yaml:"timestamps"`
+	Rules            Rules          `yaml:"rules"`
+	UpdateFrequency  *time.Duration `yaml:"updateFrequency"`
+	RulesVersion     string         `yaml:"rulesVersion"`
+	AcceptUpdates    bool           `yaml:"acceptUpdates"`
+	DataSources      string         `yaml:"dataSources"`
+	Window           time.Duration  `yaml:"window"`
+	Skip             int            `yaml:"skip"`
 }
 
 type Rules struct {
