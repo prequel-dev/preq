@@ -14,9 +14,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-/* -------------------------------------------------------------------------
-   Trigger/Action
-
+/*
 actions:
   - type: slack
     regex: "CRE-2025-00*"
@@ -43,13 +41,7 @@ actions:
         *preq detection*: [{{ field .cre "Id" }}] {{ field .cre "Title" }}
       description_template: |
         {{ (index .hits 0).Timestamp }}: {{ (index .hits 0).Entry }}
-
-
---------------------------------------------------------------------------*/
-
-// ------------------------------------------------------------------------
-// Action interface & factory
-// ------------------------------------------------------------------------
+*/
 
 type Action interface {
 	Execute(ctx context.Context, cre map[string]any) error
