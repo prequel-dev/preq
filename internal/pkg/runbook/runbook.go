@@ -3,17 +3,11 @@ package runbook
 import (
 	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
-	"os/exec"
 	"reflect"
 	"regexp"
 	"text/template"
-	"time"
 
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/rs/zerolog/log"
@@ -21,37 +15,36 @@ import (
 )
 
 /* -------------------------------------------------------------------------
-   Trigger/Action proof‑of‑concept (YAML‑driven)
+   Trigger/Action
 
-   Build & run:
-     go run ./... config.yaml event.json
+actions:
+  - type: slack
+    regex: "CRE-2025-00*"
+    slack:
+      webhook_url: https://hooks.slack.com/services/...
+      message_template: |
+           *preq detection*: [{{ field .cre "Id" }}] {{ field .cre "Title" }}
 
-   Example config.yaml
-   -------------------
-   actions:
-     # 1) Slack notification
-     - type: slack
-       slack:
-         webhook_url: https://hooks.slack.com/services/T000/B000/XXX
-         message_template: |
-           *Build failed!* 🚨\nReason: {{ .Reason }}\nCommit: {{ .Commit }}
+           {{ (index .hits 0).Timestamp }}: {{ (index .hits 0).Entry }}
+  - type: exec
+    regex: "CRE-2025-0025"
+    exec:
+      path: ./action.sh
+      args:
+        - '{{ field .cre "Id" }}'
+        - '{{ len .hits }}'
+  - type: jira
+    regex: "CRE-2025-0025"
+    jira:
+      project_key: KAN
+      webhook_url: https://prequel-team.atlassian.net/rest/api/3/issue
+      secret_env: JIRA_TOKEN
+      summary_template: |
+        *preq detection*: [{{ field .cre "Id" }}] {{ field .cre "Title" }}
+      description_template: |
+        {{ (index .hits 0).Timestamp }}: {{ (index .hits 0).Entry }}
 
-     # 2) Jira Automation webhook
-     - type: jira
-       jira:
-         webhook_url: https://your-domain.atlassian.net/gateway/api/automation/.../WEBHOOK_ID
-         secret: abc123
-         summary_template: Build failed on {{ .Branch }}
-         description_template: |
-           Commit: {{ .Commit }}\nReason: {{ .Reason }}
 
-     # 3) Run local helper script
-     - type: exec
-       exec:
-         path: /usr/local/bin/notify.sh
-         args:
-           - "--branch={{ .Branch }}"
-           - "--reason={{ .Reason }}"
 --------------------------------------------------------------------------*/
 
 // ------------------------------------------------------------------------
@@ -75,7 +68,7 @@ type actionConfig struct {
 	Exec  *execConfig  `yaml:"exec,omitempty"`
 }
 
-func extractCREID(ev map[string]any) string {
+func extractCreId(ev map[string]any) string {
 	if cre, ok := ev["cre"]; ok {
 		// map variant
 		if m, ok := cre.(map[string]any); ok {
@@ -115,7 +108,7 @@ func (f *filteredAction) Execute(ctx context.Context, ev map[string]any) error {
 	if f.pattern == nil { // no filter → always run
 		return f.inner.Execute(ctx, ev)
 	}
-	if id := extractCREID(ev); id != "" && f.pattern.MatchString(id) {
+	if id := extractCreId(ev); id != "" && f.pattern.MatchString(id) {
 		return f.inner.Execute(ctx, ev) // match → run
 	}
 	return nil // no match → silently skip
@@ -169,21 +162,7 @@ func buildActions(cfgPath string) ([]Action, error) {
 	return actions, nil
 }
 
-// ------------------------------------------------------------------------
-// Slack Action
-// ------------------------------------------------------------------------
-
-type slackConfig struct {
-	WebhookURL      string `yaml:"webhook_url"`
-	MessageTemplate string `yaml:"message_template"`
-}
-
-type slackAction struct {
-	cfg   slackConfig
-	tmpl  *template.Template
-	httpc *http.Client
-}
-
+// template helper function to extract fields from CRE reports
 func funcMap() template.FuncMap {
 	return template.FuncMap{
 		// field works with map[string]any OR struct / *struct
@@ -217,190 +196,6 @@ func funcMap() template.FuncMap {
 	}
 }
 
-func newSlackAction(cfg slackConfig) (Action, error) {
-	if cfg.WebhookURL == "" {
-		return nil, errors.New("slack.webhook_url is required")
-	}
-	if cfg.MessageTemplate == "" {
-		return nil, errors.New("slack.message_template is required")
-	}
-	t, err := template.New("slack").Funcs(funcMap()).Parse(cfg.MessageTemplate)
-	if err != nil {
-		return nil, err
-	}
-
-	return &slackAction{
-		cfg:  cfg,
-		tmpl: t,
-		httpc: &http.Client{
-			Timeout: 5 * time.Second,
-		},
-	}, nil
-}
-
-func (s *slackAction) Execute(ctx context.Context, cre map[string]any) error {
-	var msg string
-	if err := executeTemplate(&msg, s.tmpl, cre); err != nil {
-		return err
-	}
-	payload := struct {
-		Text string `json:"text"`
-	}{Text: msg}
-	body, _ := json.Marshal(payload)
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, s.cfg.WebhookURL,
-		bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := s.httpc.Do(req)
-	if err != nil {
-		return fmt.Errorf("slack post: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("slack post failed: %s – %s", resp.Status, respBody)
-	}
-	return nil
-}
-
-// ------------------------------------------------------------------------
-// Jira Action (Automation webhook flavour)
-// ------------------------------------------------------------------------
-
-type jiraConfig struct {
-	WebhookURL          string `yaml:"webhook_url"`
-	Secret              string `yaml:"secret"`     // optional
-	SecretEnv           string `yaml:"secret_env"` // optional
-	SummaryTemplate     string `yaml:"summary_template"`
-	DescriptionTemplate string `yaml:"description_template"`
-	ProjectKey          string `yaml:"project_key"` // e.g. "PREQ"
-}
-
-type jiraAction struct {
-	cfg         jiraConfig
-	summaryTmpl *template.Template
-	descTmpl    *template.Template
-	httpc       *http.Client
-}
-
-func newJiraAction(cfg jiraConfig) (Action, error) {
-	if cfg.WebhookURL == "" {
-		return nil, errors.New("jira.webhook_url is required")
-	}
-	if cfg.SummaryTemplate == "" {
-		return nil, errors.New("jira.summary_template is required")
-	}
-	if cfg.ProjectKey == "" {
-		return nil, errors.New("jira.project_key is required when using REST API mode")
-	}
-	st, err := template.New("jira-summary").Funcs(funcMap()).Parse(cfg.SummaryTemplate)
-	if err != nil {
-		return nil, err
-	}
-	dt, err := template.New("jira-desc").Funcs(funcMap()).Parse(cfg.DescriptionTemplate)
-	if err != nil {
-		return nil, err
-	}
-
-	if cfg.Secret == "" && cfg.SecretEnv != "" {
-		cfg.Secret = os.Getenv(cfg.SecretEnv)
-	}
-	// optional: hard‑fail if both were empty
-	if cfg.Secret == "" {
-		return nil, errors.New("jira secret missing; set either 'secret' or 'secret_env'")
-	}
-
-	return &jiraAction{
-		cfg:         cfg,
-		summaryTmpl: st,
-		descTmpl:    dt,
-		httpc: &http.Client{
-			Timeout: 5 * time.Second,
-		},
-	}, nil
-}
-
-func (j *jiraAction) Execute(ctx context.Context, cre map[string]any) error {
-	var summary, desc string
-	if err := executeTemplate(&summary, j.summaryTmpl, cre); err != nil {
-		return err
-	}
-	if err := executeTemplate(&desc, j.descTmpl, cre); err != nil {
-		return err
-	}
-	payload := map[string]any{
-		"project":     map[string]any{"key": j.cfg.ProjectKey},
-		"summary":     summary,
-		"description": adfParagraph(desc),
-		"issuetype":   map[string]any{"name": "Bug"},
-	}
-	body, _ := json.Marshal(payload)
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, j.cfg.WebhookURL,
-		bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	if j.cfg.Secret != "" {
-		req.Header.Set("X-Automation-Webhook-Token", j.cfg.Secret)
-	}
-	resp, err := j.httpc.Do(req)
-	if err != nil {
-		return fmt.Errorf("jira post: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("jira post failed: %s – %s", resp.Status, respBody)
-	}
-	return nil
-}
-
-// ------------------------------------------------------------------------
-// Exec Action
-// ------------------------------------------------------------------------
-
-type execConfig struct {
-	Path string   `yaml:"path"`
-	Args []string `yaml:"args"`
-}
-
-type execAction struct {
-	cfg execConfig
-}
-
-func newExecAction(cfg execConfig) (Action, error) {
-	if cfg.Path == "" {
-		return nil, errors.New("exec.path is required")
-	}
-	return &execAction{cfg: cfg}, nil
-}
-
-func (e *execAction) Execute(ctx context.Context, cre map[string]any) error {
-	// Template‑render each arg
-	args := make([]string, len(e.cfg.Args))
-	for i, a := range e.cfg.Args {
-		tmpl, err := template.New("arg").Funcs(funcMap()).Parse(a)
-		if err != nil {
-			return err
-		}
-		if err := executeTemplate(&args[i], tmpl, cre); err != nil {
-			return err
-		}
-	}
-
-	raw, err := json.Marshal(cre)
-	if err != nil {
-		return err
-	}
-
-	cmd := exec.CommandContext(ctx, e.cfg.Path, args...)
-	cmd.Stdin = bytes.NewReader(raw)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
-// ------------------------------------------------------------------------
-// Helpers
-// ------------------------------------------------------------------------
-
 func executeTemplate(out *string, tmpl *template.Template, data any) error {
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
@@ -409,10 +204,6 @@ func executeTemplate(out *string, tmpl *template.Template, data any) error {
 	*out = buf.String()
 	return nil
 }
-
-// ------------------------------------------------------------------------
-// Main
-// ------------------------------------------------------------------------
 
 func Runbook(ctx context.Context, cfgPath string, report ux.ReportDocT) error {
 
@@ -430,22 +221,4 @@ func Runbook(ctx context.Context, cfgPath string, report ux.ReportDocT) error {
 	}
 
 	return nil
-}
-
-func adfParagraph(txt string) map[string]any {
-	return map[string]any{
-		"type":    "doc",
-		"version": 1,
-		"content": []any{
-			map[string]any{
-				"type": "paragraph",
-				"content": []any{
-					map[string]any{
-						"type": "text",
-						"text": txt,
-					},
-				},
-			},
-		},
-	}
 }
