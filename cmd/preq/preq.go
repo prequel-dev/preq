@@ -14,6 +14,7 @@ import (
 )
 
 var vars = kong.Vars{
+	"actionHelp":        ux.HelpAction,
 	"disabledHelp":      ux.HelpDisabled,
 	"generateHelp":      ux.HelpGenerate,
 	"cronHelp":          ux.HelpCron,

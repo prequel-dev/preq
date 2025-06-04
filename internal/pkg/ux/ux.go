@@ -90,6 +90,7 @@ Happy hunting!`
 )
 
 var (
+	HelpAction        = "Path to an automated action or runbook config file"
 	HelpCron          = "Generate Kubernetes cronjob template"
 	HelpDisabled      = "Do not run community CREs"
 	HelpGenerate      = "Generate data sources template"

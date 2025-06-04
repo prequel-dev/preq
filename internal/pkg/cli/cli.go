@@ -12,6 +12,7 @@ import (
 	"github.com/prequel-dev/preq/internal/pkg/engine"
 	"github.com/prequel-dev/preq/internal/pkg/resolve"
 	"github.com/prequel-dev/preq/internal/pkg/rules"
+	"github.com/prequel-dev/preq/internal/pkg/runbook"
 	"github.com/prequel-dev/preq/internal/pkg/timez"
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
@@ -20,6 +21,7 @@ import (
 )
 
 var Options struct {
+	Action        string `short:"a" help:"${actionHelp}"`
 	Disabled      bool   `short:"d" help:"${disabledHelp}"`
 	Generate      bool   `short:"g" help:"${generateHelp}"`
 	Cron          bool   `short:"j" help:"${cronHelp}"`
@@ -262,6 +264,22 @@ LOOP:
 	case report.Size() == 0:
 		log.Debug().Msg("No CREs found")
 		return nil
+
+	case Options.Action != "":
+		log.Debug().Msgf("Running action %s", Options.Action)
+
+		report, err := report.CreateReport()
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to create report")
+			ux.RulesError(err)
+			return err
+		}
+
+		if err := runbook.Runbook(ctx, Options.Action, report); err != nil {
+			log.Error().Err(err).Msg("Failed to run action")
+			ux.RulesError(err)
+			return err
+		}
 
 	case c.Notification.Type == ux.NotificationSlack:
 
