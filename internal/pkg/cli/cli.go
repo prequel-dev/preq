@@ -266,7 +266,7 @@ LOOP:
 		return nil
 
 	case Options.Action != "":
-		log.Debug().Msgf("Running action %s", Options.Action)
+		log.Debug().Str("path", Options.Action).Msg("Running action")
 
 		report, err := report.CreateReport()
 		if err != nil {

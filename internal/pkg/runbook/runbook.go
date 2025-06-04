@@ -43,6 +43,12 @@ actions:
         {{ (index .hits 0).Timestamp }}: {{ (index .hits 0).Entry }}
 */
 
+const (
+	ActionTypeSlack = "slack"
+	ActionTypeJira  = "jira"
+	ActionTypeExec  = "exec"
+)
+
 type Action interface {
 	Execute(ctx context.Context, cre map[string]any) error
 }
@@ -120,17 +126,17 @@ func buildActions(cfgPath string) ([]Action, error) {
 	for i, c := range file.Actions {
 		var a Action
 		switch c.Type {
-		case "slack":
+		case ActionTypeSlack:
 			if c.Slack == nil {
 				return nil, fmt.Errorf("missing slack section for action #%d", i)
 			}
 			a, err = newSlackAction(*c.Slack)
-		case "jira":
+		case ActionTypeJira:
 			if c.Jira == nil {
 				return nil, fmt.Errorf("missing jira section for action #%d", i)
 			}
 			a, err = newJiraAction(*c.Jira)
-		case "exec":
+		case ActionTypeExec:
 			if c.Exec == nil {
 				return nil, fmt.Errorf("missing exec section for action #%d", i)
 			}

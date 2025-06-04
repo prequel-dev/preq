@@ -53,8 +53,11 @@ func (s *slackAction) Execute(ctx context.Context, cre map[string]any) error {
 		Text string `json:"text"`
 	}{Text: msg}
 	body, _ := json.Marshal(payload)
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, s.cfg.WebhookURL,
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.cfg.WebhookURL,
 		bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("slack post: %w", err)
+	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := s.httpc.Do(req)
 	if err != nil {

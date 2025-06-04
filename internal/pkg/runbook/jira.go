@@ -81,8 +81,11 @@ func (j *jiraAction) Execute(ctx context.Context, cre map[string]any) error {
 		"issuetype":   map[string]any{"name": "Bug"},
 	}
 	body, _ := json.Marshal(payload)
-	req, _ := http.NewRequestWithContext(ctx, http.MethodPost, j.cfg.WebhookURL,
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, j.cfg.WebhookURL,
 		bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("jira post: %w", err)
+	}
 	req.Header.Set("Content-Type", "application/json")
 	if j.cfg.Secret != "" {
 		req.Header.Set("X-Automation-Webhook-Token", j.cfg.Secret)
