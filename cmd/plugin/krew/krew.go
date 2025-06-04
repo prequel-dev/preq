@@ -328,17 +328,6 @@ func redirectConfigMap(ctx context.Context, clientset *kubernetes.Clientset, nam
 }
 
 func redirectPodLogs(ctx context.Context, clientset *kubernetes.Clientset, namespace, pod string) error {
-
-	var (
-		rdr io.ReadCloser
-		err error
-	)
-
-	rdr, err = clientset.CoreV1().Pods(namespace).GetLogs(pod, &v1.PodLogOptions{}).Stream(ctx)
-	if err != nil {
-		return err
-	}
-
 	pr, pw, err := os.Pipe()
 	if err != nil {
 		return err
@@ -346,12 +335,24 @@ func redirectPodLogs(ctx context.Context, clientset *kubernetes.Clientset, names
 
 	go func() {
 		defer pw.Close()
-		if _, err := io.Copy(pw, rdr); err != nil {
-			log.Warn().Err(err).Msg("copy logs -> pipe failed")
+
+		if prev, err := clientset.CoreV1().
+			Pods(namespace).
+			GetLogs(pod, &v1.PodLogOptions{Previous: true}).
+			Stream(ctx); err == nil {
+			_, _ = io.Copy(pw, prev) // best-effort copy
+			_ = prev.Close()
+		}
+
+		if curr, err := clientset.CoreV1().
+			Pods(namespace).
+			GetLogs(pod, &v1.PodLogOptions{}).
+			Stream(ctx); err == nil {
+			_, _ = io.Copy(pw, curr)
+			_ = curr.Close()
 		}
 	}()
 
 	os.Stdin = pr
-
 	return cli.InitAndExecute(ctx)
 }
