@@ -41,12 +41,22 @@ actions:
         *preq detection*: [{{ field .cre "Id" }}] {{ field .cre "Title" }}
       description_template: |
         {{ (index .hits 0).Timestamp }}: {{ (index .hits 0).Entry }}
+  - type: linear
+    regex: "CRE-2025-0026"
+    linear:
+      team_id: 9cfb482a-81e3-4154-b5b9-2c805e70a02d
+      secret_env: LINEAR_TOKEN
+      title_template: |
+        [{{ field .cre "Id" }}] {{ field .cre "Title" }}
+      description_template: |
+        {{ (index .hits 0).Timestamp }}: {{ (index .hits 0).Entry }}
 */
 
 const (
-	ActionTypeSlack = "slack"
-	ActionTypeJira  = "jira"
-	ActionTypeExec  = "exec"
+	ActionTypeSlack  = "slack"
+	ActionTypeJira   = "jira"
+	ActionTypeLinear = "linear"
+	ActionTypeExec   = "exec"
 )
 
 type Action interface {
@@ -63,6 +73,7 @@ type actionConfig struct {
 
 	Slack *slackConfig `yaml:"slack,omitempty"`
 	Jira  *jiraConfig  `yaml:"jira,omitempty"`
+	Linear *linearConfig `yaml:"linear,omitempty"`
 	Exec  *execConfig  `yaml:"exec,omitempty"`
 }
 
@@ -141,6 +152,11 @@ func buildActions(cfgPath string) ([]Action, error) {
 				return nil, fmt.Errorf("missing exec section for action #%d", i)
 			}
 			a, err = newExecAction(*c.Exec)
+		case ActionTypeLinear:
+			if c.Linear == nil {
+				return nil, fmt.Errorf("missing linear section for action #%d", i)
+			}
+			a, err = newLinearAction(*c.Linear)
 		default:
 			err = fmt.Errorf("unknown action type %q (index %d)", c.Type, i)
 		}
