@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"strings"
 	"text/template"
 
 	"github.com/prequel-dev/preq/internal/pkg/ux"
@@ -49,7 +50,27 @@ actions:
       title_template: |
         [{{ field .cre "Id" }}] {{ field .cre "Title" }}
       description_template: |
-        {{ (index .hits 0).Timestamp }}: {{ (index .hits 0).Entry }}
+        {{ stripdash (field .cre "Description") }}
+        ### Impact
+        {{ stripdash (field .cre "Impact") }}
+        ### Cause
+        {{ stripdash (field .cre "Cause") }}
+        ## Mitigation
+        {{ field .cre "Mitigation" }}
+        {{- $refs := field .cre "References" -}}
+        {{- if $refs }}
+        ### References
+        {{ range $refs }}
+        - {{ . }}
+        {{ end }}
+        {{- end }}
+        +++ ## Events
+        {{- range .hits }}
+          ```
+          {{ .Entry }}
+          ```
+        {{- end }}
+        +++
 */
 
 const (
@@ -206,6 +227,15 @@ func funcMap() template.FuncMap {
 			}
 			log.Error().Msgf("field: unknown type: %T", obj)
 			return nil // unknown
+		},
+		"stripdash": func(v any) string {
+			if s, ok := v.(string); ok {
+				s = strings.TrimSpace(s)
+				if strings.HasPrefix(s, "- ") {
+					return strings.TrimPrefix(s, "- ")
+				}
+			}
+			return fmt.Sprintf("%v", v)
 		},
 	}
 }
