@@ -28,31 +28,11 @@ jobs:
       - name: Run tests
         run: |
           go test ./... -covermode=count -coverpkg=./... -coverprofile=coverage.out
-          go tool cover -func=coverage.out -o coverage.out
+          go tool cover -func=coverage.out
+          COV=$(go tool cover -func=coverage.out | grep total: | awk '{print $3}' | tr -d '%')
+          printf '{"totals": {"percent_covered_display": %.2f}}' "$COV" > coverage.json
 
-      - name: Generate coverage badge
-        uses: tj-actions/coverage-badge-go@v2
-        with:
-          filename: coverage.out
-
-      - name: Verify changed files
-        id: verify
-        uses: tj-actions/verify-changed-files@v16
-        with:
-          files: README.md
-
-      - name: Commit badge
-        if: steps.verify.outputs.files_changed == 'true'
-        run: |
-          git config user.email "action@github.com"
-          git config user.name "GitHub Action"
-          git add README.md
-          git commit -m "chore: update coverage badge"
-
-      - name: Push badge
-        if: steps.verify.outputs.files_changed == 'true'
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.head_ref || github.ref_name }}
+      - name: Update coverage badge
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: we-cli/coverage-badge-action@v1.0.1
 
