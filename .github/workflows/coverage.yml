@@ -1,0 +1,58 @@
+name: coverage
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.24.2
+
+      - name: Run tests
+        run: |
+          go test ./... -covermode=count -coverpkg=./... -coverprofile=coverage.out
+          go tool cover -func=coverage.out -o coverage.out
+
+      - name: Generate coverage badge
+        uses: tj-actions/coverage-badge-go@v2
+        with:
+          filename: coverage.out
+
+      - name: Verify changed files
+        id: verify
+        uses: tj-actions/verify-changed-files@v16
+        with:
+          files: README.md
+
+      - name: Commit badge
+        if: steps.verify.outputs.files_changed == 'true'
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git add README.md
+          git commit -m "chore: update coverage badge"
+
+      - name: Push badge
+        if: steps.verify.outputs.files_changed == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref || github.ref_name }}
+
