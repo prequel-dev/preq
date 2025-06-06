@@ -8,7 +8,7 @@ import (
 
 	krewpkg "github.com/prequel-dev/preq/cmd/plugin/krew"
 	"github.com/prequel-dev/preq/internal/pkg/cli"
-	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
@@ -40,7 +40,7 @@ func cliFlagSet() map[string]struct{} {
 func krewFlagSet() map[string]struct{} {
 	cmd := krewpkg.RootCmd(context.Background(), krewpkg.NewRunOptions(genericclioptions.IOStreams{}))
 	flags := map[string]struct{}{}
-	cmd.Flags().VisitAll(func(f *cobra.Flag) {
+	cmd.Flags().VisitAll(func(f *pflag.Flag) {
 		flags[f.Name] = struct{}{}
 	})
 	return flags
