@@ -29,6 +29,9 @@ actions:
     regex: "CRE-2025-0025"
     exec:
       path: ./action.sh
+      expr: |
+        echo "Critical incident: {{ field .cre "Id" }}"
+      runtime: bash -
       args:
         - '{{ field .cre "Id" }}'
         - '{{ len .hits }}'
