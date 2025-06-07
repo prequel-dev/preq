@@ -1,30 +1,42 @@
 # preq
-
-`preq` (prounounced "preek") is a free and open community-driven reliability problem detector
-
-[Documentation](https://docs.prequel.dev) | [Slack](https://inviter.co/prequel) | [Playground](https://play.prequel.dev/) | [Mailing List](https://www.detect.sh)
-
+![Coverage](https://img.shields.io/badge/Coverage-29.7%25-red)
 [![Unit Tests](https://github.com/prequel-dev/cre/actions/workflows/build.yml/badge.svg)](https://github.com/prequel-dev/cre/actions/workflows/build.yml)
 [![Unit Tests](https://github.com/prequel-dev/preq/actions/workflows/build.yml/badge.svg)](https://github.com/prequel-dev/preq/actions/workflows/build.yml)
 [![Unit Tests](https://github.com/prequel-dev/prequel-compiler/actions/workflows/build.yml/badge.svg)](https://github.com/prequel-dev/prequel-compiler/actions/workflows/build.yml)
 
+preq (prounounced "preek") is a free and open community-driven reliability problem detector
+
+[Documentation](https://docs.prequel.dev) | [Slack](https://inviter.co/prequel) | [Playground](https://play.prequel.dev/) | [Mailing List](https://www.detect.sh)
+
 ---
 
-Use `preq` to:
+Use preq to:
 
 - detect the latest bugs, misconfigurations, anti-patterns, and known issues from a community of practitioners
 - provide engineers, on-call support, and SRE agents with impact and community recommended mitigations
 - hunt for new problems in distributed systems
 
-## Install
+preq is powered by [Common Reliability Enumerations (CREs)](https://github.com/prequel-dev/cre) that are contributed by the community and Prequel's Reliability Research Team. Reliability intelligence helps teams see a broad range of problems earlier, so they can prioritize, pinpoint, and reduce the risk of outages.
 
-See https://docs.prequel.dev/install.
+## Download and Install
+
+### Binary Distributions
+
+Official binary distributions are available at [latest release](https://github.com/prequel-dev/preq/releases) for Linux (amd64), macOS (amd64 and arm64), and Windows (amd64). All macOS binaries are signed and notarized. No configuration is necessary to start using preq.
+
+### Kubernetes
+
+You can also install preq as a Krew plugin:
+
+```bash
+kubectl krew install preq
+```
+
+See https://docs.prequel.dev/install for more information.
 
 ## Overview
 
-`preq` uses Common Reliability Enumerations (CREs) created by the problem detection community and Prequel's Reliability Research Team to detect reliability problems. Reliability Intelligence from CREs helps teams see the most problems and see them first so they can prioritize, pinpoint, and act to mitigate outages.
-
-`preq` is powered by a rules engine that performs distributed matching and correlation of sequences of events across logs, metrics, traces, and other data sources to detect reliability problems. CREs provides accurate and timely context for a human or SRE agent to take action on problems.
+preq is powered by a rules engine that performs distributed matching and correlation of sequences of events across logs, metrics, traces, and other data sources to detect reliability problems. CREs provides accurate and timely context for a human or SRE agent to take action on problems.
 
 Below is simple rule that looks for a sequence of events in a single log source over a window of time along with a negative condition (an event that should not occur during the window).
 
@@ -71,3 +83,12 @@ rule:
     negate:
       - SIGTERM received - shutting down
 ```
+
+## Running
+
+* See https://docs.prequel.dev/running for examples of how to run preq
+* See https://docs.prequel.dev/running#automated-runbooks for examples of how to setup automated runbooks when a CRE is detected
+
+## Contributing
+
+Open a PR and let's go!
