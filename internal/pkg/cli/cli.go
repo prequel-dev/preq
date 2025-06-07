@@ -41,6 +41,15 @@ var (
 	ruleUpdateFile   = filepath.Join(defaultConfigDir, ".ruleupdate")
 )
 
+var (
+	getRulesFunc = func(ctx context.Context, conf *config.Config, configDir, cmdLineRules, token, ruleUpdateFile, baseAddr string, tlsPort, udpPort int) ([]utils.RulePathT, error) {
+		return rules.GetRules(ctx, conf, configDir, cmdLineRules, token, ruleUpdateFile, baseAddr, tlsPort, udpPort)
+	}
+	loginUserFunc = func(ctx context.Context, baseAddr, ruleToken string) (string, error) {
+		return auth.Login(ctx, baseAddr, ruleToken)
+	}
+)
+
 const (
 	tlsPort    = 443
 	udpPort    = 8081
@@ -105,7 +114,7 @@ func InitAndExecute(ctx context.Context) error {
 	}
 
 	// Log in for community rule updates
-	if token, err = auth.Login(ctx, baseAddr, ruleToken); err != nil {
+	if token, err = loginUserFunc(ctx, baseAddr, ruleToken); err != nil {
 		log.Error().Err(err).Msg("Failed to login")
 
 		// A notice will be printed if the email is not verified
@@ -128,7 +137,7 @@ func InitAndExecute(ctx context.Context) error {
 		c.Skip = timez.DefaultSkip
 	}
 
-	rulesPaths, err = rules.GetRules(ctx, c, defaultConfigDir, Options.Rules, token, ruleUpdateFile, baseAddr, tlsPort, udpPort)
+	rulesPaths, err = getRulesFunc(ctx, c, defaultConfigDir, Options.Rules, token, ruleUpdateFile, baseAddr, tlsPort, udpPort)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get rules")
 		ux.RulesError(err)
