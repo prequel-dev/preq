@@ -33,8 +33,6 @@ func TestDataSourceFileParsing(t *testing.T) {
 	tempDir := t.TempDir()
 
 	t.Run("valid data source file", func(t *testing.T) {
-		// FIX: Corrected the YAML indentation. The properties 'type', 'desc',
-		// and 'locations' must be indented to be part of the list item.
 		validContent := `
 version: 1.0
 sources:
