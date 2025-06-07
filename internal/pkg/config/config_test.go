@@ -49,3 +49,26 @@ func TestLoadConfigFromBytes(t *testing.T) {
 		t.Fatalf("expected 1s window, got %v", cfg.Window)
 	}
 }
+
+func TestWriteDefaultConfigAndResolveOpts(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "cfg.yaml")
+	if err := config.WriteDefaultConfig(path, config.WithWindow(2*time.Second)); err != nil {
+		t.Fatalf("WriteDefaultConfig: %v", err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read file: %v", err)
+	}
+	if !strings.Contains(string(data), "window: 2s") {
+		t.Fatalf("window option missing")
+	}
+
+	cfg, err := config.LoadConfig(dir, "cfg.yaml")
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	if len(cfg.ResolveOpts()) == 0 {
+		t.Fatalf("expected resolve options")
+	}
+}

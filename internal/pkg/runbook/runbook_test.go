@@ -3,6 +3,7 @@ package runbook
 import (
 	"bytes"
 	"context"
+	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -125,5 +126,69 @@ func TestBuildActions(t *testing.T) {
 	}
 	if len(acts) != 1 {
 		t.Fatalf("expected 1 action got %d", len(acts))
+	}
+}
+
+func TestNewJiraActionAndAdfParagraph(t *testing.T) {
+	_, err := newJiraAction(jiraConfig{})
+	if err == nil {
+		t.Fatalf("expected error for missing fields")
+	}
+	os.Setenv("JIRA_TOKEN", "tok")
+	defer os.Unsetenv("JIRA_TOKEN")
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		if !bytes.Contains(body, []byte("CRE-7")) {
+			t.Errorf("missing id")
+		}
+		w.WriteHeader(200)
+	}))
+	defer srv.Close()
+	cfg := jiraConfig{
+		WebhookURL:          srv.URL,
+		SecretEnv:           "JIRA_TOKEN",
+		SummaryTemplate:     "{{field .cre \"ID\"}}",
+		DescriptionTemplate: "d",
+		ProjectKey:          "PR",
+	}
+	a, err := newJiraAction(cfg)
+	if err != nil {
+		t.Fatalf("newJiraAction: %v", err)
+	}
+	para := adfParagraph("x")
+	if para["type"] != "doc" {
+		t.Fatalf("unexpected adf")
+	}
+	if err := a.Execute(context.Background(), map[string]any{"cre": map[string]any{"ID": "CRE-7"}}); err != nil {
+		t.Fatalf("execute: %v", err)
+	}
+}
+
+func TestNewLinearAction(t *testing.T) {
+	_, err := newLinearAction(linearConfig{})
+	if err == nil {
+		t.Fatalf("expected error for missing fields")
+	}
+	os.Setenv("LIN_TOKEN", "tok")
+	defer os.Unsetenv("LIN_TOKEN")
+	cfg := linearConfig{TeamID: "T", SecretEnv: "LIN_TOKEN", TitleTemplate: "{{.}}", DescriptionTemplate: "d"}
+	a, err := newLinearAction(cfg)
+	if err != nil {
+		t.Fatalf("newLinearAction: %v", err)
+	}
+	if a == nil {
+		t.Fatalf("expected action")
+	}
+}
+
+func TestRunbook(t *testing.T) {
+	script := filepath.Join(t.TempDir(), "run.sh")
+	os.WriteFile(script, []byte("#!/bin/sh\nexit 0"), 0755)
+	cfg := "actions:\n- type: exec\n  exec:\n    path: " + script + "\n"
+	path := filepath.Join(t.TempDir(), "cfg.yaml")
+	os.WriteFile(path, []byte(cfg), 0644)
+	report := ux.ReportDocT{{"cre": map[string]any{"ID": "CRE"}}}
+	if err := Runbook(context.Background(), path, report); err != nil {
+		t.Fatalf("Runbook: %v", err)
 	}
 }

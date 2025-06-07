@@ -156,3 +156,12 @@ func TestParseRulesPathMultiDoc(t *testing.T) {
 		t.Fatalf("expected 1 rule got %d", len(r.Rules))
 	}
 }
+
+func TestGunzipBytesErrorAndCopyFileError(t *testing.T) {
+	if _, err := utils.GunzipBytes("bad.gz"); err == nil {
+		t.Fatalf("expected error")
+	}
+	if err := utils.CopyFile("missing", "dst"); err == nil {
+		t.Fatalf("expected error")
+	}
+}
