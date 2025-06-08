@@ -41,6 +41,7 @@ var (
 	ruleUpdateFile   = filepath.Join(defaultConfigDir, ".ruleupdate")
 )
 
+// Package-level variables to allow mocking in tests.
 var (
 	getRulesFunc = func(ctx context.Context, conf *config.Config, configDir, cmdLineRules, token, ruleUpdateFile, baseAddr string, tlsPort, udpPort int) ([]utils.RulePathT, error) {
 		return rules.GetRules(ctx, conf, configDir, cmdLineRules, token, ruleUpdateFile, baseAddr, tlsPort, udpPort)
@@ -114,6 +115,7 @@ func InitAndExecute(ctx context.Context) error {
 	}
 
 	// Log in for community rule updates
+	// Mockable function variable to allow for testing without real network calls
 	if token, err = loginUserFunc(ctx, baseAddr, ruleToken); err != nil {
 		log.Error().Err(err).Msg("Failed to login")
 
@@ -137,6 +139,7 @@ func InitAndExecute(ctx context.Context) error {
 		c.Skip = timez.DefaultSkip
 	}
 
+	// Mockable function variable to allow for testing without real network calls
 	rulesPaths, err = getRulesFunc(ctx, c, defaultConfigDir, Options.Rules, token, ruleUpdateFile, baseAddr, tlsPort, udpPort)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get rules")
