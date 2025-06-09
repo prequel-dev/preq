@@ -12,7 +12,7 @@ import (
 func TestNew(t *testing.T) {
 	t.Run("creates new runtime with correct initial values", func(t *testing.T) {
 		stop := int64(100)
-		uxFactory := &ux.UxEvalT{}
+		uxFactory := ux.NewUxEval()
 
 		runtime := New(stop, uxFactory)
 
@@ -44,7 +44,7 @@ func TestNew(t *testing.T) {
 	})
 
 	t.Run("handles zero stop value", func(t *testing.T) {
-		runtime := New(0, &ux.UxEvalT{})
+		runtime := New(0, ux.NewUxEval())
 		if runtime == nil {
 			t.Fatal("Expected runtime to not be nil")
 		}
@@ -56,7 +56,7 @@ func TestNew(t *testing.T) {
 
 func TestRuntimeT_AddRules(t *testing.T) {
 	t.Run("adds rules successfully", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		rules := &parser.RulesT{
 			Rules: []parser.ParseRuleT{
 				{
@@ -84,7 +84,7 @@ func TestRuntimeT_AddRules(t *testing.T) {
 	})
 
 	t.Run("handles duplicate rules", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		rules := &parser.RulesT{
 			Rules: []parser.ParseRuleT{
 				{
@@ -113,7 +113,7 @@ func TestRuntimeT_AddRules(t *testing.T) {
 	})
 
 	t.Run("handles multiple rules", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		rules := &parser.RulesT{
 			Rules: []parser.ParseRuleT{
 				{
@@ -147,7 +147,7 @@ func TestRuntimeT_AddRules(t *testing.T) {
 	})
 
 	t.Run("handles empty rules slice", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		rules := &parser.RulesT{
 			Rules: []parser.ParseRuleT{},
 		}
@@ -164,7 +164,7 @@ func TestRuntimeT_AddRules(t *testing.T) {
 
 func TestRuntimeT_GetCre(t *testing.T) {
 	t.Run("returns rule when found", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		expectedCre := parser.ParseCreT{Id: "test-cre"}
 		runtime.Rules["test-hash"] = expectedCre
 
@@ -178,7 +178,7 @@ func TestRuntimeT_GetCre(t *testing.T) {
 	})
 
 	t.Run("returns error when rule not found", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 
 		cre, err := runtime.getCre("non-existent")
 		if err != ErrRuleNotFound {
@@ -190,7 +190,7 @@ func TestRuntimeT_GetCre(t *testing.T) {
 	})
 
 	t.Run("handles empty hash", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 
 		cre, err := runtime.getCre("")
 		if err != ErrRuleNotFound {
@@ -204,7 +204,7 @@ func TestRuntimeT_GetCre(t *testing.T) {
 
 func TestRuntimeT_Close(t *testing.T) {
 	t.Run("closes runtime without error", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		err := runtime.Close()
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
@@ -212,7 +212,7 @@ func TestRuntimeT_Close(t *testing.T) {
 	})
 
 	t.Run("handles multiple close calls", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		err := runtime.Close()
 		if err != nil {
 			t.Errorf("Expected no error on first close, got %v", err)
@@ -226,7 +226,7 @@ func TestRuntimeT_Close(t *testing.T) {
 
 func TestRuntimeT_Run(t *testing.T) {
 	t.Run("handles empty sources", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		matchers := &RuleMatchersT{
 			match:    make(map[string]any),
 			cb:       make(map[string]compiler.CallbackT),
@@ -241,7 +241,7 @@ func TestRuntimeT_Run(t *testing.T) {
 	})
 
 	t.Run("handles nil matchers", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		report := ux.NewReport(nil)
 
 		err := runtime.Run(context.Background(), nil, []*LogData{}, report)
@@ -251,7 +251,7 @@ func TestRuntimeT_Run(t *testing.T) {
 	})
 
 	t.Run("handles nil report", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		matchers := &RuleMatchersT{
 			match:    make(map[string]any),
 			cb:       make(map[string]compiler.CallbackT),
@@ -265,7 +265,7 @@ func TestRuntimeT_Run(t *testing.T) {
 	})
 
 	t.Run("handles nil context", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		matchers := &RuleMatchersT{
 			match:    make(map[string]any),
 			cb:       make(map[string]compiler.CallbackT),
@@ -280,7 +280,7 @@ func TestRuntimeT_Run(t *testing.T) {
 	})
 
 	t.Run("handles nil sources", func(t *testing.T) {
-		runtime := New(100, &ux.UxEvalT{})
+		runtime := New(100, ux.NewUxEval())
 		matchers := &RuleMatchersT{
 			match:    make(map[string]any),
 			cb:       make(map[string]compiler.CallbackT),
