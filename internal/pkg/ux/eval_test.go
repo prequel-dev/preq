@@ -39,12 +39,48 @@ func TestUxEvalT_IncrementRuleTracker(t *testing.T) {
 			t.Errorf("Expected Rules to be 1, got %d", eval.Rules)
 		}
 	})
+
+	t.Run("handles multiple increments", func(t *testing.T) {
+		eval := NewUxEval()
+		eval.IncrementRuleTracker(1)
+		eval.IncrementRuleTracker(1)
+		eval.IncrementRuleTracker(1)
+		if eval.Rules != 3 {
+			t.Errorf("Expected Rules to be 3, got %d", eval.Rules)
+		}
+	})
+
+	t.Run("handles zero increment", func(t *testing.T) {
+		eval := NewUxEval()
+		eval.IncrementRuleTracker(0)
+		if eval.Rules != 1 {
+			t.Errorf("Expected Rules to be 1, got %d", eval.Rules)
+		}
+	})
 }
 
 func TestUxEvalT_IncrementProblemsTracker(t *testing.T) {
 	t.Run("increments problems counter", func(t *testing.T) {
 		eval := NewUxEval()
 		eval.IncrementProblemsTracker(1)
+		if eval.Problems != 1 {
+			t.Errorf("Expected Problems to be 1, got %d", eval.Problems)
+		}
+	})
+
+	t.Run("handles multiple increments", func(t *testing.T) {
+		eval := NewUxEval()
+		eval.IncrementProblemsTracker(1)
+		eval.IncrementProblemsTracker(1)
+		eval.IncrementProblemsTracker(1)
+		if eval.Problems != 3 {
+			t.Errorf("Expected Problems to be 3, got %d", eval.Problems)
+		}
+	})
+
+	t.Run("handles zero increment", func(t *testing.T) {
+		eval := NewUxEval()
+		eval.IncrementProblemsTracker(0)
 		if eval.Problems != 1 {
 			t.Errorf("Expected Problems to be 1, got %d", eval.Problems)
 		}
@@ -71,6 +107,26 @@ func TestUxEvalT_StartLinesTracker(t *testing.T) {
 
 		if eval.Lines.Load() != 100 {
 			t.Errorf("Expected Lines to be 100, got %d", eval.Lines.Load())
+		}
+	})
+
+	t.Run("handles changing line count", func(t *testing.T) {
+		eval := NewUxEval()
+		var lines atomic.Int64
+		lines.Store(100)
+
+		killCh := make(chan struct{})
+		eval.StartLinesTracker(&lines, killCh)
+
+		// Update line count
+		lines.Store(200)
+		time.Sleep(100 * time.Millisecond)
+
+		close(killCh)
+		time.Sleep(100 * time.Millisecond)
+
+		if eval.Lines.Load() != 200 {
+			t.Errorf("Expected Lines to be 200, got %d", eval.Lines.Load())
 		}
 	})
 }
@@ -122,6 +178,43 @@ func TestUxEvalT_FinalStats(t *testing.T) {
 		}
 		if bytes != 5000 {
 			t.Errorf("Expected bytes to be 5000, got %d", bytes)
+		}
+	})
+
+	t.Run("handles zero values", func(t *testing.T) {
+		eval := NewUxEval()
+		close(eval.done)
+
+		stats, err := eval.FinalStats()
+		if err != nil {
+			t.Errorf("Expected no error, got %v", err)
+		}
+
+		if rules, ok := stats["rules"].(uint32); !ok || rules != 0 {
+			t.Errorf("Expected rules to be 0, got %v", rules)
+		}
+		if problems, ok := stats["problems"].(uint32); !ok || problems != 0 {
+			t.Errorf("Expected problems to be 0, got %v", problems)
+		}
+		if lines, ok := stats["lines"].(int64); !ok || lines != 0 {
+			t.Errorf("Expected lines to be 0, got %v", lines)
+		}
+		if bytes, ok := stats["bytes"].(int64); !ok || bytes != 0 {
+			t.Errorf("Expected bytes to be 0, got %v", bytes)
+		}
+	})
+
+	t.Run("handles nil done channel", func(t *testing.T) {
+		eval := NewUxEval()
+		eval.done = nil
+
+		stats, err := eval.FinalStats()
+		if err != nil {
+			t.Errorf("Expected no error, got %v", err)
+		}
+
+		if len(stats) != 4 {
+			t.Errorf("Expected 4 stats, got %d", len(stats))
 		}
 	})
 }
