@@ -2,6 +2,7 @@ package ux
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/Masterminds/semver"
@@ -26,11 +27,14 @@ func TestPrintVersion(t *testing.T) {
 	output := string(buf[:n])
 
 	// Verify output contains expected strings
-	if !contains(output, "No rules installed") {
+	if !strings.Contains(output, "No rules installed") {
 		t.Error("Expected output to contain 'No rules installed'")
 	}
-	if !contains(output, "Learn more at https://docs.prequel.dev") {
+	if !strings.Contains(output, "Learn more at https://docs.prequel.dev") {
 		t.Error("Expected output to contain 'Learn more at https://docs.prequel.dev'")
+	}
+	if !strings.Contains(output, "darwin/amd64") {
+		t.Error("Expected output to contain OS/arch")
 	}
 }
 
@@ -53,10 +57,10 @@ func TestPrintUsage(t *testing.T) {
 	output := string(buf[:n])
 
 	// Verify output contains expected strings
-	if !contains(output, "Usage:") {
-		t.Error("Expected output to contain 'Usage:'")
+	if !strings.Contains(output, "Usage:") {
+		t.Errorf("Expected output to contain 'Usage:', got: %s", output)
 	}
-	if !contains(output, "See --help or visit https://docs.prequel.dev for more information") {
+	if !strings.Contains(output, "See --help or visit https://docs.prequel.dev for more information") {
 		t.Error("Expected output to contain help message")
 	}
 }
@@ -122,10 +126,10 @@ func TestPrintEmailVerifyNotice(t *testing.T) {
 	output := string(buf[:n])
 
 	// Verify output contains expected strings
-	if !contains(output, "You're one step away! Please verify your email") {
+	if !strings.Contains(output, "You're one step away! Please verify your email") {
 		t.Error("Expected output to contain email verification title")
 	}
-	if !contains(output, "test@example.com") {
+	if !strings.Contains(output, "test@example.com") {
 		t.Error("Expected output to contain email address")
 	}
 }
@@ -156,7 +160,7 @@ func TestPrintDeviceAuthUrl(t *testing.T) {
 	output := string(buf[:n])
 
 	// Verify output contains expected strings
-	if !contains(output, "https://example.com/auth") {
+	if !strings.Contains(output, "https://example.com/auth") {
 		t.Error("Expected output to contain auth URL")
 	}
 }
@@ -184,9 +188,4 @@ func TestWriteDataSourceTemplate(t *testing.T) {
 	if _, err := os.Stat(output); os.IsNotExist(err) {
 		t.Error("Expected file to exist")
 	}
-}
-
-// Helper function to check if a string contains a substring
-func contains(s, substr string) bool {
-	return s != "" && substr != "" && s != substr
 }
