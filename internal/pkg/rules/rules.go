@@ -380,7 +380,7 @@ func requestExeUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl,
 		}
 	}
 
-	eb, err = downloadPackage(ctx, apiUrl, dataUrl, token, dataSize, pw, slowCheckTimeout, downloadTimeout)
+	eb, err = downloadPackage(ctx, apiUrl, dataUrl, token, dataSize, pw, downloadTimeout)
 	if err != nil {
 		return err
 	}
@@ -394,7 +394,7 @@ func requestExeUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl,
 		Str("path", newExePath).
 		Msg("Temp updated exe path")
 
-	hb, err = downloadPackage(ctx, apiUrl, hashUrl, token, hashSize, pw, slowCheckTimeout, downloadTimeout)
+	hb, err = downloadPackage(ctx, apiUrl, hashUrl, token, hashSize, pw, downloadTimeout)
 	if err != nil {
 		return err
 	}
@@ -408,7 +408,7 @@ func requestExeUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl,
 		Str("path", newExeHashPath).
 		Msg("Temp updated exe hash path")
 
-	sb, err = downloadPackage(ctx, apiUrl, sigUrl, token, sigSize, pw, slowCheckTimeout, downloadTimeout)
+	sb, err = downloadPackage(ctx, apiUrl, sigUrl, token, sigSize, pw, downloadTimeout)
 	if err != nil {
 		return err
 	}
@@ -511,7 +511,7 @@ func requestRuleUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl
 		rb, hb, sb      []byte
 	)
 
-	rb, err = downloadPackage(ctx, apiUrl, fullResp.RuleUrls.DataUrl, token, fullResp.RuleUrls.DataSize, pw, slowCheckTimeout, downloadTimeout)
+	rb, err = downloadPackage(ctx, apiUrl, fullResp.RuleUrls.DataUrl, token, fullResp.RuleUrls.DataSize, pw, downloadTimeout)
 	if err != nil {
 		return "", err
 	}
@@ -525,7 +525,7 @@ func requestRuleUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl
 		Str("path", newRulePath).
 		Msg("Temp updated rule path")
 
-	hb, err = downloadPackage(ctx, apiUrl, fullResp.RuleUrls.HashUrl, token, fullResp.RuleUrls.HashSize, pw, slowCheckTimeout, downloadTimeout)
+	hb, err = downloadPackage(ctx, apiUrl, fullResp.RuleUrls.HashUrl, token, fullResp.RuleUrls.HashSize, pw, downloadTimeout)
 	if err != nil {
 		return "", err
 	}
@@ -539,7 +539,7 @@ func requestRuleUpdate(ctx context.Context, fullResp *RuleUpdateResponse, apiUrl
 		Str("path", newRuleHashPath).
 		Msg("Temp updated rule hash path")
 
-	sb, err = downloadPackage(ctx, apiUrl, fullResp.RuleUrls.SigUrl, token, fullResp.RuleUrls.SigSize, pw, slowCheckTimeout, downloadTimeout)
+	sb, err = downloadPackage(ctx, apiUrl, fullResp.RuleUrls.SigUrl, token, fullResp.RuleUrls.SigSize, pw, downloadTimeout)
 	if err != nil {
 		return "", err
 	}

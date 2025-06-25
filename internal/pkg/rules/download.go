@@ -107,13 +107,13 @@ func rulesDownloadAuthRequest(ctx context.Context, retries int, baseUrl, rulesDo
 	)
 }
 
-func downloadPackage(ctx context.Context, apiUrl, packageUrl, token string, totalSize int64, pw progress.Writer, slowCheckTimeout, downloadTimeout time.Duration) ([]byte, error) {
+func downloadPackage(ctx context.Context, apiUrl, packageUrl, token string, totalSize int64, pw progress.Writer, downloadTimeout time.Duration) ([]byte, error) {
 	var (
 		authHdrs *RulesDownloadAuth
 		err      error
 	)
 
-	if authHdrs, err = rulesDownloadAuthRequest(ctx, numAttempts, apiUrl, packageUrl, token, slowCheckTimeout); err != nil {
+	if authHdrs, err = rulesDownloadAuthRequest(ctx, numAttempts, apiUrl, packageUrl, token, downloadTimeout); err != nil {
 		log.Error().Err(err).Msg("Fail RulesDownloadAuthRequest")
 		return nil, err
 	}
