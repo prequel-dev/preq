@@ -26,7 +26,9 @@
 ---
 preq (prounounced "preek") is a free and open community-driven reliability problem detector
 
-<img alt=demo> 
+<p align="center">
+  <img src="assets/demo.GIF" alt="preq demo" width="700">
+</p>
 
 Use **preq** to:
 
@@ -56,20 +58,20 @@ See https://docs.prequel.dev/install for more information.
 
 ## Quick Usage
 
-Step 1: Install and run the demo service
+**Step 1**: Install and run the demo service
 
 ```bash
 curl -sL "$(curl -s https://api.github.com/repos/prequel-dev/preq-demo-app/releases/latest \
   | jq -r '.assets[] | select(.name | test("demo-linux-amd64$")) .browser_download_url')" \
   -o demo && chmod +x demo && ./demo > preq-demo.log 2>&1
 ```
-Step 2: Trigger a problem
+**Step 2**: Trigger a problem
 ```bash
 curl -sL "$(curl -s https://api.github.com/repos/prequel-dev/preq-demo-app/releases/latest \
   | jq -r '.assets[] | select(.name | test("demo-linux-amd64$")) .browser_download_url')" \
   -o demo && chmod +x demo && ./demo > preq-demo.log 2>&1
 ```
-Step 3: Detect the problem
+**Step 3**: Detect the problem
 ```bash
 cat preq-demo.log | preq -o -
 ```
