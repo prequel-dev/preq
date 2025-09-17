@@ -27,7 +27,7 @@
 preq (prounounced "preek") is a free and open community-driven reliability problem detector
 
 <p align="center">
-  <img src="assets/demo.GIF" alt="preq demo" width="700">
+  <img src="assets/demo.gif" alt="preq demo" width="700">
 </p>
 
 Use **preq** to:
