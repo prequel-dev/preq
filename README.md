@@ -167,3 +167,6 @@ We’re building an open reliability detection community nd we’d love you to j
 We welcome contributions of all kinds: bug fixes, docs, new CRE rules, or feature ideas.
 
 See the contribution guide for more details: https://docs.prequel.dev/cres/contributing
+
+---
+Licensed under the [Apache License 2.0](https://github.com/prequel-dev/preq/blob/main/LICENSE)
