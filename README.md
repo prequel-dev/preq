@@ -24,23 +24,23 @@
 </div>
 
 ---
-preq (prounounced "preek") is a free and open community-driven reliability problem detector
+`preq` (prounounced "preek") is a free and open community-driven reliability problem detector
 
 <p align="center">
   <img src="assets/demo.gif" alt="preq demo" width="700">
 </p>
 
-Use **preq** to:
+Use `preq` to:
 
 - detect the latest bugs, misconfigurations, anti-patterns, and known issues from a community of practitioners
 - provide engineers, on-call support, and SRE agents with impact and community recommended mitigations
 - hunt for new problems in distributed systems
 
-preq is powered by [Common Reliability Enumerations (CREs)](https://github.com/prequel-dev/cre) that are contributed by the community and Prequel's Reliability Research Team. Reliability intelligence helps teams see a broad range of problems earlier, so they can prioritize, pinpoint, and reduce the risk of outages.
+`preq` is powered by [Common Reliability Enumerations (CREs)](https://github.com/prequel-dev/cre) that are contributed by the community and Prequel's Reliability Research Team. Reliability intelligence helps teams see a broad range of problems earlier, so they can prioritize, pinpoint, and reduce the risk of outages.
 
 
 
-## Install preq
+## Install `preq`
 
 ### Binary Distributions
 
@@ -48,7 +48,7 @@ Official binary distributions are available at [latest release](https://github.c
 
 ### Kubernetes
 
-You can also install preq as a Krew plugin:
+You can also install `preq` as a Krew plugin:
 
 ```bash
 kubectl krew install preq
@@ -147,7 +147,7 @@ See https://docs.prequel.dev/running#automated-runbooks for examples of how to s
 
 ## Data sources other than `stdin`
 
-preq works on any timestamped data source, not just `stdin`.
+`preq` works on any timestamped data source, not just `stdin`.
 You can define multiple sources (e.g., app logs, system logs, metrics dumps) in a YAML template and let preq automatically map CRE rules to the right data.
 
 Learn more about data sources here: https://docs.prequel.dev/data-sources
