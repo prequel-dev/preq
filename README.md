@@ -42,7 +42,7 @@ preq is powered by [Common Reliability Enumerations (CREs)](https://github.com/p
 
 ## Install preq
 
-### Standalone Binary Distributions
+### Binary Distributions
 
 Official binary distributions are available at [latest release](https://github.com/prequel-dev/preq/releases) for Linux (amd64), macOS (amd64 and arm64), and Windows (amd64). All macOS binaries are signed and notarized. No configuration is necessary to start using preq.
 
@@ -62,14 +62,12 @@ See https://docs.prequel.dev/install for more information.
 
 ```bash
 curl -sL "$(curl -s https://api.github.com/repos/prequel-dev/preq-demo-app/releases/latest \
-  | jq -r '.assets[] | select(.name | test("demo-linux-amd64$")) .browser_download_url')" \
+  | jq -r '.assets[] | select(.name | test("demo-darwin-arm64$")) .browser_download_url')" \
   -o demo && chmod +x demo && ./demo > preq-demo.log 2>&1
 ```
 **Step 2**: Trigger a problem
 ```bash
-curl -sL "$(curl -s https://api.github.com/repos/prequel-dev/preq-demo-app/releases/latest \
-  | jq -r '.assets[] | select(.name | test("demo-linux-amd64$")) .browser_download_url')" \
-  -o demo && chmod +x demo && ./demo > preq-demo.log 2>&1
+curl http://localhost:8080/panic
 ```
 **Step 3**: Detect the problem
 ```bash
@@ -86,14 +84,10 @@ CRE-2025-0918        critical [1 hits @ 2025-03-11T10:00:19-04:00]
 ```
 See our running preq guide for full walkthrough, including writing your own rules: https://docs.prequel.dev/running
 
-## Architecture Overview
-
-<img alt="architecture image">
-
-preq is powered by a rules engine that performs distributed matching and correlation of sequences of events across logs, metrics, traces, and other data sources to detect reliability problems. CREs provides accurate and timely context for a human or SRE agent to take action on problems.
 
 ## Example CRE
-Below is simple rule that looks for a sequence of events in a single log source over a window of time along with a negative condition (an event that should not occur during the window).
+
+This rule detects a specific sequence of events from one log source within a set time period. It also checks that a certain event doesn’t occur during that period. If it does, the rule will not trigger.
 
 ```yaml title="cre-2024-0007.yaml" showLineNumbers
 cre:
@@ -140,7 +134,12 @@ rule:
 ```
 
 ## Automated Actions using preq
-See https://docs.prequel.dev/running#automated-runbooks for examples of how to setup automated runbooks when a CRE is detected and trigger actions:
+
+You can connect detections to automated runbooks that take action when a CRE fires. For example, restarting a service or notifying your on-call team.
+
+You can run automated actions on new detections using `preq -a <actions.yaml>`.
+
+See https://docs.prequel.dev/running#automated-runbooks for examples of how to setup automated runbooks when a CRE is detected and trigger actions like:
 - Slack Notifications
 - Jira Issue Creation
 - Runbook executables
@@ -148,13 +147,13 @@ See https://docs.prequel.dev/running#automated-runbooks for examples of how to s
 
 ## Data sources other than `stdin`
 
-preq works on any timestamped data source, not just stdin.
+preq works on any timestamped data source, not just `stdin`.
 You can define multiple sources (e.g., app logs, system logs, metrics dumps) in a YAML template and let preq automatically map CRE rules to the right data.
 
 Learn more about data sources here: https://docs.prequel.dev/data-sources
 
 ## Community
-We’re building an open reliability detection community nd we’d love you to join!
+We’re building an open reliability detection community and we’d love you to join!
 
 - [Slack](https://inviter.co/prequel): Ask questions, share detections, propose new CREs. 
 
@@ -166,7 +165,7 @@ We’re building an open reliability detection community nd we’d love you to j
 
 ## Contributing
 
-We welcome contributions of all kinds: bug fixes, docs, new CRE rules, or feature ideas.
+We welcome contributions of all kinds: bug fixes, docs, new CRE rules, or feature ideas!
 
 See the contribution guide for more details: https://docs.prequel.dev/cres/contributing
 
