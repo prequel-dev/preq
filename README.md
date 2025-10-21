@@ -44,7 +44,7 @@ Use `preq` to:
 
 ### Binary Distributions
 
-Official binary distributions are available at [latest release](https://github.com/prequel-dev/preq/releases) for Linux (amd64), macOS (amd64 and arm64), and Windows (amd64). All macOS binaries are signed and notarized. No configuration is necessary to start using preq.
+Official binary distributions are available at [latest release](https://github.com/prequel-dev/preq/releases) for Linux (amd64 and arm64), macOS (arm64), and Windows (amd64). All macOS binaries are signed and notarized. No configuration is necessary to start using preq.
 
 ### Kubernetes
 
