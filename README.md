@@ -24,7 +24,7 @@
 </div>
 
 ---
-`preq` (prounounced "preek") is a free and open community-driven reliability problem detector
+`preq` (prounounced "preek") is a free and open-source community-driven reliability problem detector.
 
 <p align="center">
   <img src="assets/demo.gif" alt="preq demo" width="700">
@@ -153,7 +153,7 @@ You can define multiple sources (e.g., app logs, system logs, metrics dumps) in 
 Learn more about data sources here: https://docs.prequel.dev/data-sources
 
 ## Community
-We’re building an open reliability detection community and we’d love you to join!
+We’re building an open-source reliability detection community and we’d love you to join!
 
 - [Slack](https://inviter.co/prequel): Ask questions, share detections, propose new CREs. 
 
