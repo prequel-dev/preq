@@ -24,7 +24,7 @@
 </div>
 
 ---
-`preq` (prounounced "preek") is a free and open community-driven reliability problem detector
+`preq` (pronounced "preek") is a free and open community-driven reliability problem detector
 
 <p align="center">
   <img src="assets/demo.gif" alt="preq demo" width="700">
@@ -33,7 +33,7 @@
 Use `preq` to:
 
 - detect the latest bugs, misconfigurations, anti-patterns, and known issues from a community of practitioners
-- provide engineers, on-call support, and SRE agents with impact and community recommended mitigations
+- provide engineers, on-call support, and SRE agents with impact and community-recommended mitigations
 - hunt for new problems in distributed systems
 
 `preq` is powered by [Common Reliability Enumerations (CREs)](https://github.com/prequel-dev/cre) that are contributed by the community and Prequel's Reliability Research Team. Reliability intelligence helps teams see a broad range of problems earlier, so they can prioritize, pinpoint, and reduce the risk of outages.
@@ -73,7 +73,7 @@ curl http://localhost:8080/panic
 ```bash
 cat preq-demo.log | preq -o -
 ```
-You’ll see a detection printed with the corresponding CRE ID, severity, and suggested mitigation.
+You will see a detection printed with the corresponding CRE ID, severity, and suggested mitigation.
 
 ```bash
 Parsing rules           done! [3 rules in 3ms; 433 rules/s]
@@ -82,12 +82,12 @@ Reading stdin           done! [208.64KB in 4ms; 53.01MB/s]
 Matching lines          done! [1.01K lines in 4ms; 275.29K lines/s]
 CRE-2025-0918        critical [1 hits @ 2025-03-11T10:00:19-04:00]
 ```
-See our running preq guide for full walkthrough, including writing your own rules: https://docs.prequel.dev/running
+See our running `preq` guide for full walkthrough, including writing your own rules: https://docs.prequel.dev/running
 
 
 ## Example CRE
 
-This rule detects a specific sequence of events from one log source within a set time period. It also checks that a certain event doesn’t occur during that period. If it does, the rule will not trigger.
+This rule detects a specific sequence of events from one log source within a set time period. It also checks that a certain event does not occur during that period. If it does, the rule will not trigger.
 
 ```yaml title="cre-2024-0007.yaml" showLineNumbers
 cre:
@@ -133,7 +133,7 @@ rule:
       - SIGTERM received - shutting down
 ```
 
-## Automated Actions using preq
+## Automated Actions using `preq`
 
 You can connect detections to automated runbooks that take action when a CRE fires. For example, restarting a service or notifying your on-call team.
 
@@ -148,12 +148,12 @@ See https://docs.prequel.dev/running#automated-runbooks for examples of how to s
 ## Data sources other than `stdin`
 
 `preq` works on any timestamped data source, not just `stdin`.
-You can define multiple sources (e.g., app logs, system logs, metrics dumps) in a YAML template and let preq automatically map CRE rules to the right data.
+You can define multiple sources (e.g., app logs, system logs, metric dumps) in a YAML template and let `preq` automatically map CRE rules to the right data.
 
 Learn more about data sources here: https://docs.prequel.dev/data-sources
 
 ## Community
-We’re building an open reliability detection community and we’d love you to join!
+We are building an open reliability detection community and we would love you to join!
 
 - [Slack](https://inviter.co/prequel): Ask questions, share detections, propose new CREs. 
 
