@@ -82,7 +82,7 @@ func compileRuleTree(cf compiler.RuntimeI, tree *parser.TreeT) (compiler.ObjsT, 
 		compiler.WithRuntime(cf),
 	}
 
-	if nodeObjs, err = compiler.CompileTree(tree, schema.ScopeNode, opts...); err != nil {
+	if nodeObjs, err = compiler.CompileTree(tree, schema.ScopeDefault, opts...); err != nil {
 		return nil, err
 	}
 

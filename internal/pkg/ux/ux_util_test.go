@@ -1,7 +1,9 @@
 package ux
 
 import (
+	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -33,8 +35,10 @@ func TestPrintVersion(t *testing.T) {
 	if !strings.Contains(output, "Learn more at https://docs.prequel.dev") {
 		t.Error("Expected output to contain 'Learn more at https://docs.prequel.dev'")
 	}
-	if !strings.Contains(output, "darwin/amd64") {
-		t.Error("Expected output to contain OS/arch")
+
+	expectedOSArch := fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
+	if !strings.Contains(output, expectedOSArch) {
+		t.Errorf("Expected output to contain OS/arch '%s'", expectedOSArch)
 	}
 }
 
