@@ -24,7 +24,7 @@ import (
 	"github.com/prequel-dev/prequel-logmatch/pkg/entry"
 	lm "github.com/prequel-dev/prequel-logmatch/pkg/match"
 	"github.com/prequel-dev/prequel-logmatch/pkg/scanner"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 
 	"github.com/jedib0t/go-pretty/v6/progress"
 	"github.com/rs/zerolog/log"
