@@ -17,7 +17,7 @@ import (
 
 	"github.com/prequel-dev/prequel-compiler/pkg/parser"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
