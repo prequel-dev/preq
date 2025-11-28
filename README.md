@@ -1,32 +1,54 @@
-# preq
-![Coverage](https://img.shields.io/badge/Coverage-49.43%25-orange)
-[![Unit Tests](https://github.com/prequel-dev/cre/actions/workflows/build.yml/badge.svg)](https://github.com/prequel-dev/cre/actions/workflows/build.yml)
-[![Unit Tests](https://github.com/prequel-dev/preq/actions/workflows/build.yml/badge.svg)](https://github.com/prequel-dev/preq/actions/workflows/build.yml)
-[![Unit Tests](https://github.com/prequel-dev/prequel-compiler/actions/workflows/build.yml/badge.svg)](https://github.com/prequel-dev/prequel-compiler/actions/workflows/build.yml)
+<h1 align="center" style="border-bottom: none">
+  <a href="https://prequel.dev" target="_blank">
+    <img alt="Preq" src="assets/prequel.png" width="120">
+  </a>
+  <br>
+  preq
+</h1>
 
-preq (prounounced "preek") is a free and open community-driven reliability problem detector
+<p align="center">
+  Visit <a href="https://docs.prequel.dev" target="_blank">docs.prequel.dev</a> for full documentation,
+  examples, and guides.
+</p>
 
-[Documentation](https://docs.prequel.dev) | [Slack](https://inviter.co/prequel) | [Playground](https://play.prequel.dev/) | [Mailing List](https://www.detect.sh)
+<div align="center">
+
+[![Build – preq](https://img.shields.io/github/actions/workflow/status/prequel-dev/preq/build.yml?branch=main&label=preq%20CI&logo=github&style=for-the-badge)](https://github.com/prequel-dev/preq/actions/workflows/build.yml)
+[![Coverage](https://img.shields.io/badge/Coverage-49.43%25-orange?style=for-the-badge)](#)
+[![Release](https://img.shields.io/github/v/release/prequel-dev/preq?logo=github&style=for-the-badge)](https://github.com/prequel-dev/preq/releases)
+[![License](https://img.shields.io/badge/License-Apache--2.0-brightgreen?logo=apache&style=for-the-badge)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Slack](https://img.shields.io/badge/Slack-join-4A154B?logo=slack&logoColor=white&style=for-the-badge)](https://inviter.co/prequel)
+[![Playground](https://img.shields.io/badge/Playground-WebAssembly-654FF0?logo=webassembly&logoColor=white&style=for-the-badge)](https://play.prequel.dev/)
+[![kubectl Krew](https://img.shields.io/badge/kubectl-krew-326CE5?logo=kubernetes&logoColor=white&style=for-the-badge)](#kubernetes-krew)
+
+</div>
 
 ---
+`preq` (pronounced "preek") is a free and open community-driven reliability problem detector
 
-Use preq to:
+<p align="center">
+  <img src="assets/demo.gif" alt="preq demo" width="700">
+</p>
+
+Use `preq` to:
 
 - detect the latest bugs, misconfigurations, anti-patterns, and known issues from a community of practitioners
-- provide engineers, on-call support, and SRE agents with impact and community recommended mitigations
+- provide engineers, on-call support, and SRE agents with impact and community-recommended mitigations
 - hunt for new problems in distributed systems
 
-preq is powered by [Common Reliability Enumerations (CREs)](https://github.com/prequel-dev/cre) that are contributed by the community and Prequel's Reliability Research Team. Reliability intelligence helps teams see a broad range of problems earlier, so they can prioritize, pinpoint, and reduce the risk of outages.
+`preq` is powered by [Common Reliability Enumerations (CREs)](https://github.com/prequel-dev/cre) that are contributed by the community and Prequel's Reliability Research Team. Reliability intelligence helps teams see a broad range of problems earlier, so they can prioritize, pinpoint, and reduce the risk of outages.
 
-## Download and Install
+
+
+## Install `preq`
 
 ### Binary Distributions
 
-Official binary distributions are available at [latest release](https://github.com/prequel-dev/preq/releases) for Linux (amd64), macOS (amd64 and arm64), and Windows (amd64). All macOS binaries are signed and notarized. No configuration is necessary to start using preq.
+Official binary distributions are available at [latest release](https://github.com/prequel-dev/preq/releases) for Linux (amd64 and arm64), macOS (arm64), and Windows (amd64). All macOS binaries are signed and notarized. No configuration is necessary to start using preq.
 
 ### Kubernetes
 
-You can also install preq as a Krew plugin:
+You can also install `preq` as a Krew plugin:
 
 ```bash
 kubectl krew install preq
@@ -34,11 +56,38 @@ kubectl krew install preq
 
 See https://docs.prequel.dev/install for more information.
 
-## Overview
+## Quick Usage
 
-preq is powered by a rules engine that performs distributed matching and correlation of sequences of events across logs, metrics, traces, and other data sources to detect reliability problems. CREs provides accurate and timely context for a human or SRE agent to take action on problems.
+**Step 1**: Install and run the demo service (example macOS command below)
 
-Below is simple rule that looks for a sequence of events in a single log source over a window of time along with a negative condition (an event that should not occur during the window).
+```bash
+curl -sL "$(curl -s https://api.github.com/repos/prequel-dev/preq-demo-app/releases/latest \
+  | jq -r '.assets[] | select(.name | test("demo-darwin-arm64$")) .browser_download_url')" \
+  -o demo && chmod +x demo && ./demo > preq-demo.log 2>&1
+```
+**Step 2**: Trigger a problem
+```bash
+curl http://localhost:8080/panic
+```
+**Step 3**: Detect the problem
+```bash
+cat preq-demo.log | preq -o -
+```
+You will see a detection printed with the corresponding CRE ID, severity, and suggested mitigation.
+
+```bash
+Parsing rules           done! [3 rules in 3ms; 433 rules/s]
+Problems detected       done! [1 in 7ms; 144/s]
+Reading stdin           done! [208.64KB in 4ms; 53.01MB/s]
+Matching lines          done! [1.01K lines in 4ms; 275.29K lines/s]
+CRE-2025-0918        critical [1 hits @ 2025-03-11T10:00:19-04:00]
+```
+See our running `preq` guide for full walkthrough, including writing your own rules: https://docs.prequel.dev/running
+
+
+## Example CRE
+
+This rule detects a specific sequence of events from one log source within a set time period. It also checks that a certain event does not occur during that period. If it does, the rule will not trigger.
 
 ```yaml title="cre-2024-0007.yaml" showLineNumbers
 cre:
@@ -84,11 +133,41 @@ rule:
       - SIGTERM received - shutting down
 ```
 
-## Running
+## Automated Actions using `preq`
 
-* See https://docs.prequel.dev/running for examples of how to run preq
-* See https://docs.prequel.dev/running#automated-runbooks for examples of how to setup automated runbooks when a CRE is detected
+You can connect detections to automated runbooks that take action when a CRE fires. For example, restarting a service or notifying your on-call team.
+
+You can run automated actions on new detections using `preq -a <actions.yaml>`.
+
+See https://docs.prequel.dev/running#automated-runbooks for examples of how to setup automated runbooks when a CRE is detected and trigger actions like:
+- Slack Notifications
+- Jira Issue Creation
+- Runbook executables
+- CronJobs
+
+## Data sources other than `stdin`
+
+`preq` works on any timestamped data source, not just `stdin`.
+You can define multiple sources (e.g., app logs, system logs, metric dumps) in a YAML template and let `preq` automatically map CRE rules to the right data.
+
+Learn more about data sources here: https://docs.prequel.dev/data-sources
+
+## Community
+We are building an open reliability detection community and we would love you to join!
+
+- [Slack](https://inviter.co/prequel): Ask questions, share detections, propose new CREs. 
+
+- [Playground](https://play.prequel.dev/): Try rules in your browser with WebAssembly, no data leaves your machine.
+
+- [Docs](https://docs.prequel.dev): Explore the documentation to learn how to install, run, automate, and write CREs.
+
+- [CRE Repository](https://github.com/prequel-dev/cre): Contribute new community detection rules and help the reliability community grow.
 
 ## Contributing
 
-Open a PR and let's go!
+We welcome contributions of all kinds: bug fixes, docs, new CRE rules, or feature ideas!
+
+See the contribution guide for more details: https://docs.prequel.dev/cres/contributing
+
+---
+Licensed under the [Apache License 2.0](https://github.com/prequel-dev/preq/blob/main/LICENSE)
