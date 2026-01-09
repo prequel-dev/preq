@@ -13,10 +13,10 @@ import (
 	"github.com/prequel-dev/preq/internal/pkg/resolve"
 	"github.com/prequel-dev/preq/internal/pkg/rules"
 	"github.com/prequel-dev/preq/internal/pkg/runbook"
-	"github.com/prequel-dev/preq/internal/pkg/timez"
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/prequel-compiler/pkg/datasrc"
+	"github.com/prequel-dev/prequel-logmatch/pkg/timez"
 	"github.com/rs/zerolog/log"
 )
 

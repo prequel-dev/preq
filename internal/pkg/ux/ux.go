@@ -9,9 +9,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/prequel-dev/preq/internal/pkg/timez"
 	"github.com/prequel-dev/preq/internal/pkg/verz"
 	"github.com/prequel-dev/prequel-logmatch/pkg/format"
+	"github.com/prequel-dev/prequel-logmatch/pkg/timez"
 
 	"github.com/Masterminds/semver"
 	"github.com/fatih/color"

@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/prequel-dev/preq/internal/pkg/config"
+	"github.com/prequel-dev/preq/internal/pkg/eval"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/preq/internal/pkg/verz"
-	"github.com/prequel-dev/preq/pkg/eval"
 	"github.com/rs/zerolog/log"
 )
 
@@ -66,10 +66,10 @@ func detectWrapper(ctx context.Context) js.Func {
 	detectFunc := js.FuncOf(func(this js.Value, args []js.Value) any {
 
 		var (
-			cfg, inputData, ruleData string
-			reportDoc                ux.ReportDocT
-			stats                    ux.StatsT
-			err                      error
+			inputData, ruleData string
+			reportDoc           ux.ReportDocT
+			stats               ux.StatsT
+			err                 error
 		)
 
 		log.Info().
@@ -82,7 +82,7 @@ func detectWrapper(ctx context.Context) js.Func {
 		ruleData = args[1].String()
 
 		// Permit events to arrive out of order within a 1 hour window by default
-		cfg = config.Marshal(config.WithWindow(time.Hour))
+		cfg := config.DefaultConfig(config.WithWindow(time.Hour))
 
 		if reportDoc, stats, err = eval.Detect(ctx, cfg, inputData, ruleData); err != nil {
 			return errJson(err)

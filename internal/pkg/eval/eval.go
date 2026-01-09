@@ -6,16 +6,15 @@ import (
 	"github.com/prequel-dev/preq/internal/pkg/config"
 	"github.com/prequel-dev/preq/internal/pkg/engine"
 	"github.com/prequel-dev/preq/internal/pkg/resolve"
-	"github.com/prequel-dev/preq/internal/pkg/timez"
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
+	"github.com/prequel-dev/prequel-logmatch/pkg/timez"
 	"github.com/rs/zerolog/log"
 )
 
-func Detect(ctx context.Context, cfg, data, rule string) (ux.ReportDocT, ux.StatsT, error) {
+func Detect(ctx context.Context, c *config.Config, data, rule string) (ux.ReportDocT, ux.StatsT, error) {
 
 	var (
-		c            *config.Config
 		run          *engine.RuntimeT
 		report       *ux.ReportT
 		ruleMatchers *engine.RuleMatchersT
@@ -24,15 +23,6 @@ func Detect(ctx context.Context, cfg, data, rule string) (ux.ReportDocT, ux.Stat
 		stats        ux.StatsT
 		err          error
 	)
-
-	if len(cfg) == 0 {
-		cfg = config.Marshal()
-	}
-
-	if c, err = config.LoadConfigFromBytes(cfg); err != nil {
-		log.Error().Err(err).Msg("Failed to load config")
-		return nil, nil, err
-	}
 
 	opts := c.ResolveOpts()
 	opts = append(opts, resolve.WithTimestampTries(timez.DefaultSkip))

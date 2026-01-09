@@ -3,8 +3,8 @@ package resolve
 import (
 	"bytes"
 
-	"github.com/prequel-dev/preq/internal/pkg/timez"
 	"github.com/prequel-dev/prequel-logmatch/pkg/format"
+	"github.com/prequel-dev/prequel-logmatch/pkg/timez"
 	"github.com/rs/zerolog/log"
 )
 

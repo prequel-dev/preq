@@ -215,8 +215,8 @@ github.com/posener/complete v1.2.3 h1:NP0eAhjcjImqslEwo/1hq7gpajME0fTLTezBKDqfXq
 github.com/posener/complete v1.2.3/go.mod h1:WZIdtGGp+qx0sLrYKtIRAruyNpv6hFCicSgv7Sy7s/s=
 github.com/prequel-dev/prequel-compiler v0.0.20 h1:NTDfvUgmT83on6RDA+GihAgNM4ZvGLo9r34DAdc2tFQ=
 github.com/prequel-dev/prequel-compiler v0.0.20/go.mod h1:sqZKM2senjfoqjBqnq6u/r3qoWjTSCxI8rh4sW9zQkQ=
-github.com/prequel-dev/prequel-logmatch v0.0.16 h1:7e/ATexC8MmRGDyxpNdy8taDdFWUNRp1y3JQUOwVPfQ=
-github.com/prequel-dev/prequel-logmatch v0.0.16/go.mod h1:hRiK9FGVqbiQWLbJReXg5Fz759BYM3xCw4hxiLF3/Jg=
+github.com/prequel-dev/prequel-logmatch v0.0.19 h1:0YslB6BqcEPGv0LUampO6rnfvVhpYGWIVseWgcJlsek=
+github.com/prequel-dev/prequel-logmatch v0.0.19/go.mod h1:hRiK9FGVqbiQWLbJReXg5Fz759BYM3xCw4hxiLF3/Jg=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=

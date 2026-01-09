@@ -9,7 +9,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jedib0t/go-pretty/v6 v6.7.5
 	github.com/posener/complete v1.2.3
-	github.com/prequel-dev/prequel-logmatch v0.0.16
+	github.com/prequel-dev/prequel-logmatch v0.0.19
 	github.com/rs/zerolog v1.34.0
 	github.com/willabides/kongplete v0.4.0
 	gopkg.in/yaml.v3 v3.0.1
