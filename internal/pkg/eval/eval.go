@@ -2,7 +2,6 @@ package eval
 
 import (
 	"context"
-	"strings"
 
 	"github.com/prequel-dev/preq/internal/pkg/config"
 	"github.com/prequel-dev/preq/internal/pkg/engine"
@@ -13,10 +12,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func Detect(ctx context.Context, cfg, data, rule string) (ux.ReportDocT, ux.StatsT, error) {
+func Detect(ctx context.Context, c *config.Config, data, rule string) (ux.ReportDocT, ux.StatsT, error) {
 
 	var (
-		c            *config.Config
 		run          *engine.RuntimeT
 		report       *ux.ReportT
 		ruleMatchers *engine.RuleMatchersT
@@ -25,16 +23,6 @@ func Detect(ctx context.Context, cfg, data, rule string) (ux.ReportDocT, ux.Stat
 		stats        ux.StatsT
 		err          error
 	)
-
-	switch len(cfg) {
-	case 0:
-		c = config.DefaultConfig()
-	default:
-		if c, err = config.ReadConfig(strings.NewReader(cfg)); err != nil {
-			log.Error().Err(err).Msg("Failed to load config")
-			return nil, nil, err
-		}
-	}
 
 	opts := c.ResolveOpts()
 	opts = append(opts, resolve.WithTimestampTries(timez.DefaultSkip))

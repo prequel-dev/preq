@@ -5,8 +5,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/prequel-dev/preq/internal/pkg/config"
+	"github.com/prequel-dev/preq/internal/pkg/eval"
 	"github.com/prequel-dev/preq/internal/pkg/logs"
-	"github.com/prequel-dev/preq/pkg/eval"
 	"github.com/rs/zerolog/log"
 )
 
@@ -138,7 +139,7 @@ func TestSuccessExamples(t *testing.T) {
 				t.Fatalf("Error reading data file %s: %v", test.dataPath, err)
 			}
 
-			_, stats, err := eval.Detect(ctx, "", string(data), string(ruleData))
+			_, stats, err := eval.Detect(ctx, config.DefaultConfig(), string(data), string(ruleData))
 			if err != nil {
 				t.Fatalf("Error running detection: %v", err)
 			}
@@ -226,7 +227,7 @@ func TestMissExamples(t *testing.T) {
 				t.Fatalf("Error reading data file %s: %v", test.dataPath, err)
 			}
 
-			_, stats, err := eval.Detect(ctx, "", string(data), string(ruleData))
+			_, stats, err := eval.Detect(ctx, config.DefaultConfig(), string(data), string(ruleData))
 			if err != nil {
 				t.Fatalf("Error running detection: %v", err)
 			}
@@ -294,7 +295,7 @@ func TestFailureExamples(t *testing.T) {
 				t.Fatalf("Error reading data file %s: %v", test.dataPath, err)
 			}
 
-			_, _, err = eval.Detect(ctx, "", string(data), string(ruleData))
+			_, _, err = eval.Detect(ctx, config.DefaultConfig(), string(data), string(ruleData))
 			if err == nil {
 				t.Fatalf("Expected error running detection: %v", err)
 			}

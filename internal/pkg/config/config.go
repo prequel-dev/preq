@@ -55,7 +55,7 @@ func parseOpts(opts ...OptT) *optsT {
 }
 
 // LoadConfig loads the configuration from the specified directory and file.
-// If the file does not exist, it creates a return a default configuration.
+// If the file does not exist, it returns a default configuration.
 
 func LoadConfig(dir, file string, opts ...OptT) (*Config, error) {
 
