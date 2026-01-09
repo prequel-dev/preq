@@ -2,13 +2,14 @@ package eval
 
 import (
 	"context"
+	"strings"
 
 	"github.com/prequel-dev/preq/internal/pkg/config"
 	"github.com/prequel-dev/preq/internal/pkg/engine"
 	"github.com/prequel-dev/preq/internal/pkg/resolve"
-	"github.com/prequel-dev/preq/internal/pkg/timez"
 	"github.com/prequel-dev/preq/internal/pkg/utils"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
+	"github.com/prequel-dev/prequel-logmatch/pkg/timez"
 	"github.com/rs/zerolog/log"
 )
 
@@ -25,13 +26,14 @@ func Detect(ctx context.Context, cfg, data, rule string) (ux.ReportDocT, ux.Stat
 		err          error
 	)
 
-	if len(cfg) == 0 {
-		cfg = config.Marshal()
-	}
-
-	if c, err = config.LoadConfigFromBytes(cfg); err != nil {
-		log.Error().Err(err).Msg("Failed to load config")
-		return nil, nil, err
+	switch len(cfg) {
+	case 0:
+		c = config.DefaultConfig()
+	default:
+		if c, err = config.ReadConfig(strings.NewReader(cfg)); err != nil {
+			log.Error().Err(err).Msg("Failed to load config")
+			return nil, nil, err
+		}
 	}
 
 	opts := c.ResolveOpts()
