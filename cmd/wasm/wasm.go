@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/prequel-dev/preq/internal/pkg/config"
-	"github.com/prequel-dev/preq/internal/pkg/eval"
 	"github.com/prequel-dev/preq/internal/pkg/ux"
 	"github.com/prequel-dev/preq/internal/pkg/verz"
+	"github.com/prequel-dev/preq/pkg/eval"
 	"github.com/rs/zerolog/log"
 )
 

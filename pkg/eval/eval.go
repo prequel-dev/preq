@@ -24,6 +24,10 @@ func Detect(ctx context.Context, c *config.Config, data, rule string) (ux.Report
 		err          error
 	)
 
+	if c == nil {
+		c = config.DefaultConfig()
+	}
+
 	opts := c.ResolveOpts()
 	opts = append(opts, resolve.WithTimestampTries(timez.DefaultSkip))
 
