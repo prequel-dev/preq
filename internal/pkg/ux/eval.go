@@ -94,8 +94,8 @@ LOOP:
 	}
 
 	return StatsT{
-		"rules":    u.Rules,
-		"problems": u.Problems,
+		"rules":    int64(u.Rules),
+		"problems": int64(u.Problems),
 		"lines":    u.Lines.Load(),
 		"bytes":    u.Bytes.Value(),
 	}, nil

@@ -103,7 +103,7 @@ var (
 	HelpAcceptUpdates = "Accept updates to rules or new release"
 )
 
-type StatsT map[string]any
+type StatsT map[string]int64
 
 type UxFactoryI interface {
 	NewBytesTracker(src string) (*progress.Tracker, error)

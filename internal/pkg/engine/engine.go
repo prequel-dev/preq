@@ -80,9 +80,10 @@ func compileRuleTree(cf compiler.RuntimeI, tree *parser.TreeT) (compiler.ObjsT, 
 
 	opts := []compiler.CompilerOptT{
 		compiler.WithRuntime(cf),
+		compiler.WithPlugin(schema.ScopeNode, compiler.NewDefaultPlugin()),
 	}
 
-	if nodeObjs, err = compiler.CompileTree(tree, schema.ScopeDefault, opts...); err != nil {
+	if nodeObjs, err = compiler.CompileTree(tree, schema.ScopeNode, opts...); err != nil {
 		return nil, err
 	}
 

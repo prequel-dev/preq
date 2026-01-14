@@ -28,6 +28,7 @@ func TestSuccessExamples(t *testing.T) {
 	var tests = map[string]struct {
 		rulePath string
 		dataPath string
+		negative bool
 	}{
 		"Example00": {
 			rulePath: "../examples/00-rules-document-example.yaml",
@@ -44,10 +45,12 @@ func TestSuccessExamples(t *testing.T) {
 		"Example03": {
 			rulePath: "../examples/03-set-negative-example.yaml",
 			dataPath: "../examples/03-example.log",
+			negative: true,
 		},
 		"Example04": {
 			rulePath: "../examples/04-set-1x1-example.yaml",
 			dataPath: "../examples/04-example.log",
+			negative: true,
 		},
 		"Example08": {
 			rulePath: "../examples/08-sequence-example-good-window.yaml",
@@ -56,6 +59,7 @@ func TestSuccessExamples(t *testing.T) {
 		"Example09": {
 			rulePath: "../examples/09-sequence-negate-example.yaml",
 			dataPath: "../examples/09-example.log",
+			negative: true,
 		},
 		"Example13": {
 			rulePath: "../examples/13-string-example.yaml",
@@ -84,6 +88,7 @@ func TestSuccessExamples(t *testing.T) {
 		"Example21": {
 			rulePath: "../examples/21-negative-example.yaml",
 			dataPath: "../examples/21-example.log",
+			negative: true,
 		},
 		"Example22": {
 			rulePath: "../examples/21-negative-example.yaml",
@@ -144,8 +149,15 @@ func TestSuccessExamples(t *testing.T) {
 				t.Fatalf("Error running detection: %v", err)
 			}
 
-			if stats["problems"] == 0 {
-				t.Fatalf("Expected problems, got %d", stats["problems"])
+			switch stats["problems"] {
+			case 0:
+				if !test.negative {
+					t.Fatalf("Expected problems, got %d", stats["problems"])
+				}
+			default:
+				if test.negative {
+					t.Fatalf("Expected no problems, got %d", stats["problems"])
+				}
 			}
 		})
 	}
@@ -232,7 +244,7 @@ func TestMissExamples(t *testing.T) {
 				t.Fatalf("Error running detection: %v", err)
 			}
 
-			if stats["problems"] != uint32(0) {
+			if stats["problems"] != 0 {
 				t.Fatalf("Expected no problems, got %d", stats["problems"])
 			}
 		})
