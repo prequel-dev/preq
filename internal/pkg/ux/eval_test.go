@@ -148,7 +148,7 @@ func TestUxEvalT_FinalStats(t *testing.T) {
 		}
 
 		// Convert map values to the correct type for comparison
-		rules, ok := stats["rules"].(uint32)
+		rules, ok := stats["rules"]
 		if !ok {
 			t.Fatal("Expected rules to be uint32")
 		}
@@ -156,7 +156,7 @@ func TestUxEvalT_FinalStats(t *testing.T) {
 			t.Errorf("Expected rules to be 5, got %d", rules)
 		}
 
-		problems, ok := stats["problems"].(uint32)
+		problems, ok := stats["problems"]
 		if !ok {
 			t.Fatal("Expected problems to be uint32")
 		}
@@ -164,7 +164,7 @@ func TestUxEvalT_FinalStats(t *testing.T) {
 			t.Errorf("Expected problems to be 2, got %d", problems)
 		}
 
-		lines, ok := stats["lines"].(int64)
+		lines, ok := stats["lines"]
 		if !ok {
 			t.Fatal("Expected lines to be int64")
 		}
@@ -172,7 +172,7 @@ func TestUxEvalT_FinalStats(t *testing.T) {
 			t.Errorf("Expected lines to be 1000, got %d", lines)
 		}
 
-		bytes, ok := stats["bytes"].(int64)
+		bytes, ok := stats["bytes"]
 		if !ok {
 			t.Fatal("Expected bytes to be int64")
 		}
@@ -190,16 +190,16 @@ func TestUxEvalT_FinalStats(t *testing.T) {
 			t.Errorf("Expected no error, got %v", err)
 		}
 
-		if rules, ok := stats["rules"].(uint32); !ok || rules != 0 {
+		if rules, ok := stats["rules"]; !ok || rules != 0 {
 			t.Errorf("Expected rules to be 0, got %v", rules)
 		}
-		if problems, ok := stats["problems"].(uint32); !ok || problems != 0 {
+		if problems, ok := stats["problems"]; !ok || problems != 0 {
 			t.Errorf("Expected problems to be 0, got %v", problems)
 		}
-		if lines, ok := stats["lines"].(int64); !ok || lines != 0 {
+		if lines, ok := stats["lines"]; !ok || lines != 0 {
 			t.Errorf("Expected lines to be 0, got %v", lines)
 		}
-		if bytes, ok := stats["bytes"].(int64); !ok || bytes != 0 {
+		if bytes, ok := stats["bytes"]; !ok || bytes != 0 {
 			t.Errorf("Expected bytes to be 0, got %v", bytes)
 		}
 	})
